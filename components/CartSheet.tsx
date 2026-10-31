@@ -4,7 +4,7 @@ import { ArrowCounterClockwise, PaperPlaneTilt, Trash } from "@phosphor-icons/re
 import { AnimatePresence, motion, useAnimationControls, type PanInfo } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { haptic } from "@/lib/fly";
-import { S, money } from "@/lib/i18n";
+import { categoryName, money, productName, useLang, useT } from "@/lib/i18n";
 import { attemptId, placeOrder, settleAttempt, trackOrder, type Tracking } from "@/lib/inbyte";
 import { EGYPT_MOBILE, normalizePhone, orderPayload, shares, totals, type Customer, type Resolved, type Table } from "@/lib/order";
 import { Sheet } from "./Sheet";
@@ -37,6 +37,7 @@ export function CartSheet({
   onLeaveTable: () => void;
   onClear: () => void;
 }) {
+  const S = useT();
   const { add, setQty, party, canOrder } = useStore();
   const t = totals(lines);
   const groups = shares(lines, party);
@@ -164,7 +165,7 @@ export function CartSheet({
   const showPlaced = placed && lines.length === 0;
 
   return (
-    <Sheet open={open} onClose={onClose} label={S.order} className="bg-[var(--paper)] text-[var(--paper-ink)]">
+    <Sheet open={open} onClose={onClose} label={S.order} className="rounded-t-[32px] bg-[var(--bg)] text-[var(--ink)]">
       <div className="relative flex min-h-0 flex-1 flex-col">
         <AnimatePresence>
           {stampAt && (
@@ -193,17 +194,17 @@ export function CartSheet({
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="py-14 text-center">
               <p className="serif text-[64px] leading-none">sawa</p>
               <p className="mt-4 text-[20px] font-semibold">{S.emptyOrder}</p>
-              <p className="mt-1 text-[15px] text-[var(--paper-muted)]">{S.emptyOrderHint}</p>
+              <p className="mt-1 text-[15px] text-[var(--muted)]">{S.emptyOrderHint}</p>
             </motion.div>
           ) : (
             <>
               {groups.map((g) => (
                 <section key={g.who} className="mt-2">
                   {many && (
-                    <div className="flex items-baseline justify-between bg-[var(--paper-2)] px-3 py-2">
+                    <div className="flex items-baseline justify-between rounded-[16px] bg-[var(--bg-2)] px-4 py-2.5">
                       <h3 className="text-[16px] font-bold">{g.name}</h3>
-                      <span className="text-[14px] text-[var(--paper-muted)]">
-                        {S.share(g.name)} <span className="serif text-[19px] text-[var(--paper-ink)] num">{money(g.totalCents)}</span>
+                      <span className="text-[14px] text-[var(--muted)]">
+                        {S.share(g.name)} <span className="serif text-[19px] text-[var(--ink)] num">{money(g.totalCents)}</span>
                       </span>
                     </div>
                   )}
@@ -217,22 +218,22 @@ export function CartSheet({
                 </section>
               ))}
 
-              <div className="mt-5 bg-[var(--paper-ink)] px-4 py-4 text-[var(--paper)]">
+              <div className="mt-5 rounded-[24px] bg-[var(--black)] px-5 py-4 text-[var(--cream)]">
                 <div className="flex items-end justify-between">
                   <span className="text-[17px] font-semibold">{S.total}</span>
                   <span className="serif text-[40px] leading-none num">
                     {money(t.totalCents)} <span className="font-[family-name:var(--font-body)] text-[14px]">{S.currency}</span>
                   </span>
                 </div>
-                <p className="mt-1 text-[13px] text-[var(--muted)]">
+                <p className="mt-1 text-[13px] text-[var(--cream-muted)]">
                   {S.estimate}. {S.pay}.
                 </p>
               </div>
 
-              <div className="mt-6 flex items-center justify-between bg-[var(--paper-2)] px-4 py-3">
+              <div className="mt-6 flex items-center justify-between rounded-[20px] bg-[var(--bg-2)] px-4 py-3">
                 <span className="text-[15px] font-semibold">{table ? S.tableHere(table.label) : S.pickup}</span>
                 {table && (
-                  <button type="button" onClick={onLeaveTable} className="press py-1 text-[14px] text-[var(--paper-muted)] underline underline-offset-4">
+                  <button type="button" onClick={onLeaveTable} className="press py-1 text-[14px] text-[var(--muted)] underline underline-offset-4">
                     {S.leaveTable}
                   </button>
                 )}
@@ -252,7 +253,7 @@ export function CartSheet({
 
               <AnimatePresence>
                 {problem && (
-                  <motion.p role="alert" className="mt-4 bg-[#f3d9d3] px-4 py-3 text-[14.5px] font-medium text-[#7d1f15]" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                  <motion.p role="alert" className="mt-4 rounded-[16px] bg-[#f3d9d3] px-4 py-3 text-[14.5px] font-medium text-[#7d1f15]" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                     {problem === "network" ? S.sendFail : problem === "rejected" ? S.sendRejected : S.sendInvalid}
                   </motion.p>
                 )}
@@ -262,7 +263,7 @@ export function CartSheet({
                 type="button"
                 onClick={send}
                 disabled={busy || !canOrder}
-                className="press mt-5 flex h-14 w-full items-center justify-center gap-2 bg-[var(--gold)] text-[17px] font-semibold text-[var(--gold-ink)] disabled:opacity-60"
+                className="press mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[var(--brown)] text-[17px] font-semibold text-[var(--cream)] disabled:opacity-60"
               >
                 {problem === "network" ? <ArrowCounterClockwise size={20} weight="bold" /> : <PaperPlaneTilt size={20} weight="fill" />}
                 {busy ? S.sending : problem === "network" ? S.retry : S.send}
@@ -278,6 +279,7 @@ export function CartSheet({
 // Where the order is, as the cashier reports it.
 const STEPS = ["RECEIVED_BY_CAFE", "ACCEPTED", "PREPARING", "READY"];
 function Status({ placed, onNew }: { placed: Placed; onNew: () => void }) {
+  const S = useT();
   const failed = placed.deliveryState === "NOT_DELIVERED" || ["REJECTED", "CANCELLED"].includes(placed.orderStatus);
   const stage = placed.deliveryState === "AWAITING_CAFE" ? "AWAITING_CAFE" : placed.orderStatus === "PENDING" ? "RECEIVED_BY_CAFE" : placed.orderStatus;
   const reached = STEPS.indexOf(stage === "COMPLETED" ? "READY" : stage);
@@ -285,7 +287,7 @@ function Status({ placed, onNew }: { placed: Placed; onNew: () => void }) {
   const total = placed.totalCents ?? placed.estimatedTotalCents;
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: EASE }} className="pb-4 pt-2">
-      {placed.orderNumber && <p className="text-[15px] text-[var(--paper-muted)]">{S.orderNo(placed.orderNumber)}</p>}
+      {placed.orderNumber && <p className="text-[15px] text-[var(--muted)]">{S.orderNo(placed.orderNumber)}</p>}
       <AnimatePresence mode="wait">
         <motion.p key={message} className="mt-1 text-[26px] font-bold leading-snug" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3, ease: EASE }}>
           {message}
@@ -294,22 +296,22 @@ function Status({ placed, onNew }: { placed: Placed; onNew: () => void }) {
       {placed.rejectionReason && <p className="mt-2 text-[15px] text-[#7d1f15]">{placed.rejectionReason}</p>}
 
       {!failed && (
-        <ol className="mt-6 grid grid-cols-4 gap-1" aria-label="مراحل الطلب">
+        <ol className="mt-6 grid grid-cols-4 gap-1" aria-label={S.steps}>
           {STEPS.map((s, i) => (
-            <li key={s} className="h-1.5 overflow-hidden bg-[var(--paper-2)]">
-              <motion.span className="block h-full bg-[var(--paper-ink)]" style={{ transformOrigin: "100% 50%" }} initial={{ scaleX: 0 }} animate={{ scaleX: i <= reached ? 1 : 0 }} transition={{ duration: 0.6, ease: EASE, delay: i * 0.08 }} />
+            <li key={s} className="h-1.5 overflow-hidden rounded-full bg-[var(--bg-3)]">
+              <motion.span className="block h-full rounded-full bg-[var(--brown)]" style={{ transformOrigin: "100% 50%" }} initial={{ scaleX: 0 }} animate={{ scaleX: i <= reached ? 1 : 0 }} transition={{ duration: 0.6, ease: EASE, delay: i * 0.08 }} />
             </li>
           ))}
         </ol>
       )}
 
-      <div className="mt-6 flex items-end justify-between bg-[var(--paper-2)] px-4 py-3">
+      <div className="mt-6 flex items-end justify-between rounded-[20px] bg-[var(--bg-2)] px-4 py-3">
         <span className="text-[15px] font-semibold">{S.total}</span>
         <span className="serif text-[30px] leading-none num">
           {money(total)} <span className="font-[family-name:var(--font-body)] text-[13px]">{S.currency}</span>
         </span>
       </div>
-      <button type="button" onClick={onNew} className="press mt-5 h-14 w-full bg-[var(--paper-ink)] text-[16px] font-semibold text-[var(--paper)]">
+      <button type="button" onClick={onNew} className="press mt-5 h-14 w-full rounded-full bg-[var(--black)] text-[16px] font-semibold text-[var(--cream)]">
         {S.newOrder}
       </button>
     </motion.div>
@@ -317,6 +319,7 @@ function Status({ placed, onNew }: { placed: Placed; onNew: () => void }) {
 }
 
 function LineRow({ line, index, onRemove, onSet, onAdd }: { line: Resolved; index: number; onRemove: () => void; onSet: (n: number) => void; onAdd: (r: DOMRect) => void }) {
+  const { lang } = useLang();
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (Math.abs(info.offset.x) > 110 || Math.abs(info.velocity.x) > 700) {
       haptic(20);
@@ -334,13 +337,13 @@ function LineRow({ line, index, onRemove, onSet, onAdd }: { line: Resolved; inde
       <div className="absolute inset-0 flex items-center justify-end px-3 text-[#8f2418]">
         <Trash size={18} weight="bold" />
       </div>
-      <motion.div drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.5} dragSnapToOrigin onDragEnd={onDragEnd} className="relative flex items-center gap-3 bg-[var(--paper)] py-3">
-        <img src={`/img/${line.category.img}.webp`} alt="" className="h-12 w-12 shrink-0 object-cover" />
+      <motion.div drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={0.5} dragSnapToOrigin onDragEnd={onDragEnd} className="relative flex items-center gap-3 bg-[var(--bg)] py-3">
+        <img src={`/img/${line.category.img}.webp`} alt="" className="h-12 w-12 shrink-0 rounded-[14px] object-cover" />
         <div className="min-w-0 flex-1">
-          <p className="text-[15.5px] font-semibold leading-snug">{line.product.ar}</p>
-          <p className="serif text-[18px] leading-tight text-[var(--paper-muted)] num">{money(line.unitCents * line.qty)}</p>
+          <p className="text-[15.5px] font-semibold leading-snug">{productName(line.product.ar, lang)}</p>
+          <p className="serif text-[18px] leading-tight text-[var(--muted)] num">{money(line.unitCents * line.qty)}</p>
         </div>
-        <AddStepper qty={line.qty} tone="paper" label={line.product.ar} onAdd={onAdd} onSet={onSet} />
+        <AddStepper qty={line.qty} tone="light" label={productName(line.product.ar, lang)} onAdd={onAdd} onSet={onSet} />
       </motion.div>
     </motion.li>
   );

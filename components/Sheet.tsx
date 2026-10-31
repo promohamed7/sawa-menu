@@ -44,7 +44,7 @@ export function Sheet({
           <motion.button
             aria-label="close"
             className="absolute inset-0 h-full w-full cursor-default"
-            style={{ background: "rgb(12 7 4 / 0.66)" }}
+            style={{ background: "rgb(21 16 12 / 0.55)" }}
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -68,7 +68,7 @@ export function Sheet({
               className="flex shrink-0 touch-none justify-center pb-2 pt-3"
               onPointerDown={(e) => controls.start(e)}
             >
-              <span className="h-1.5 w-11 rounded-full bg-[var(--paper-muted)]/50" />
+              <span className="h-1.5 w-11 rounded-full bg-[var(--bg-3)]" />
             </div>
             {children}
           </motion.div>

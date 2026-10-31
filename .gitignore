@@ -6,3 +6,4 @@ out
 next-env.d.ts
 notes/*.jpg
 notes/*.pdf
+.taste-skill/inspect/

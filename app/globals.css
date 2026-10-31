@@ -1,24 +1,24 @@
 @import "tailwindcss";
 
-/* The room: black, burnt brown, light beige; the gold of the cup rims and the name. */
+/* The room: light beige walls, burnt brown wood, black, and the gold of the name. */
 :root {
-  --ground: #100b08;
-  --ground-2: #1c140f;
-  --ground-3: #2a1e16;
-  --brown: #4a2a19;
-  --brown-2: #5a3521;
-  --ink: #efe4d2;
-  --muted: #bcab91;
-  --gold: #c9a35a;
-  --gold-ink: #1a1108;
-  --paper: #ece2d0;
-  --paper-2: #e2d5bf;
-  --paper-ink: #1a120c;
-  --paper-muted: #5e4b3a;
+  --bg: #f1ece4;
+  --bg-2: #e7dfd2;
+  --bg-3: #d9cdbb;
+  --ink: #1c130d;
+  --muted: #6b5747;
+  --brown: #5e2f17;
+  --brown-2: #7a4122;
+  --black: #15100c;
+  --cream: #f6efe4;
+  --cream-muted: #c9b9a4;
+  --gold: #b88f47;
+  --gold-soft: #d9b878;
+  --expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * {
@@ -26,7 +26,7 @@
 }
 
 html {
-  background: var(--ground);
+  background: var(--bg);
   overflow-x: clip;
 }
 
@@ -34,26 +34,27 @@ body {
   margin: 0;
   overflow-x: clip;
   min-height: 100dvh;
-  background: var(--ground);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body), system-ui, sans-serif;
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
-  caret-color: var(--gold);
+  caret-color: var(--brown);
 }
 
 ::selection {
-  background: var(--gold);
-  color: var(--gold-ink);
+  background: var(--brown);
+  color: var(--cream);
 }
 
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--brown);
   outline-offset: 3px;
+  border-radius: 999px;
 }
 
-/* The name's face: the serif of their sign */
+/* The name's face: the serif of their sign; also the prices */
 .serif {
   font-family: var(--font-serif), serif;
   font-weight: 500;
@@ -61,122 +62,146 @@ body {
 .num {
   font-variant-numeric: tabular-nums lining-nums;
 }
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
 
 .press {
-  transition: transform 160ms var(--ease-out), background-color 200ms ease, color 200ms ease;
+  transition: transform 160ms var(--ease-out), background-color 220ms ease, color 220ms ease;
   touch-action: manipulation;
   user-select: none;
 }
 .press:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 .press-row {
-  transition: background-color 200ms ease;
+  transition: background-color 220ms ease, transform 180ms var(--ease-out);
   touch-action: manipulation;
 }
 .press-row:active {
-  background-color: var(--ground-3);
+  transform: scale(0.985);
 }
 
-/* The monument: the name settles as the first screen leaves */
+/* Scroll-linked: the hero photo sinks and the name settles as the menu arrives */
 @supports (animation-timeline: scroll()) {
   @media (prefers-reduced-motion: no-preference) {
-    .monument {
-      animation: monument linear both;
+    .hero-photo {
+      animation: hero-photo linear both;
       animation-timeline: scroll(root);
-      animation-range: 0 70vh;
+      animation-range: 0 100svh;
     }
-    .cups-drift {
-      animation: cups-drift linear both;
+    .hero-name {
+      animation: hero-name linear both;
       animation-timeline: scroll(root);
-      animation-range: 0 70vh;
+      animation-range: 0 80svh;
     }
   }
 }
-@keyframes monument {
-  to { transform: scale(0.93) translateY(-2vh); }
+@keyframes hero-photo {
+  to { transform: translateY(22svh) scale(1.08); }
 }
-@keyframes cups-drift {
-  to { transform: translateY(6vh) scale(1.04); }
+@keyframes hero-name {
+  to { transform: translateY(-6svh) scale(0.9); opacity: 0.35; }
 }
 
-/* Steam off the cups */
+/* Section photos drift inside their frame while they cross the screen */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .drift {
+      animation: drift linear both;
+      animation-timeline: view();
+    }
+    .lift {
+      animation: lift linear both;
+      animation-timeline: view(inline);
+    }
+  }
+}
+@keyframes drift {
+  from { transform: translateY(-9%) scale(1.14); }
+  to { transform: translateY(9%) scale(1.14); }
+}
+/* Featured cards rise as they reach the centre of the carousel */
+@keyframes lift {
+  from { transform: scale(0.9) translateY(14px); }
+  50% { transform: scale(1) translateY(0); }
+  to { transform: scale(0.9) translateY(14px); }
+}
+
+/* Steam off the hero cups, the one loop on the page */
 @keyframes steam {
-  0% { transform: translateY(14px) scaleY(0.8); opacity: 0; }
-  30% { opacity: 0.55; }
-  100% { transform: translateY(-34px) scaleY(1.15); opacity: 0; }
+  0% { transform: translateY(18px) scaleY(0.7); opacity: 0; }
+  35% { opacity: 0.5; }
+  100% { transform: translateY(-46px) scaleY(1.2); opacity: 0; }
 }
 .steam {
   transform-box: fill-box;
   transform-origin: 50% 100%;
-  animation: steam 3.6s var(--ease-out) infinite;
-}
-
-/* Photo inside an opened menu bar eases from close-up to rest */
-@keyframes settle {
-  from { transform: scale(1.12); }
-  to { transform: scale(1); }
-}
-.settle {
-  animation: settle 1.1s var(--ease-out) both;
+  animation: steam 4.2s var(--ease-out) infinite;
 }
 
 .field {
   width: 100%;
-  background: #f7f0e3;
-  color: var(--paper-ink);
+  background: #fbf7f0;
+  color: var(--ink);
   border: 0;
-  border-radius: 0;
-  padding: 13px 14px;
+  border-radius: 16px;
+  padding: 13px 16px;
   font: inherit;
   font-size: 16px;
-  box-shadow: inset 0 0 0 1.5px transparent;
-  transition: box-shadow 160ms ease;
+  box-shadow: inset 0 0 0 1.5px var(--bg-3);
+  transition: box-shadow 180ms ease;
 }
 .field::placeholder {
-  color: #7b6652;
+  color: #8a7462;
 }
 .field:focus {
   outline: none;
-  box-shadow: inset 0 0 0 2px #9a7426;
+  box-shadow: inset 0 0 0 2px var(--brown);
 }
 .field[aria-invalid="true"] {
   box-shadow: inset 0 0 0 2px #a3281a;
 }
 .field-dark {
-  background: var(--ground-3);
-  color: var(--ink);
+  background: rgb(255 255 255 / 0.08);
+  color: var(--cream);
+  box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.18);
 }
 .field-dark::placeholder {
-  color: var(--muted);
+  color: var(--cream-muted);
+}
+.field-dark:focus {
+  box-shadow: inset 0 0 0 2px var(--gold-soft);
 }
 
 /* Gold seal pressed onto the order when it is sent */
 @keyframes seal {
   0% { transform: translate(-50%, -50%) scale(1.8) rotate(-24deg); opacity: 0; }
-  60% { transform: translate(-50%, -50%) scale(0.94) rotate(-8deg); opacity: 1; }
+  60% { transform: translate(-50%, -50%) scale(0.95) rotate(-8deg); opacity: 1; }
   100% { transform: translate(-50%, -50%) scale(1) rotate(-8deg); opacity: 1; }
 }
 .seal {
   position: absolute;
-  top: 36%;
+  top: 34%;
   left: 50%;
-  width: 150px;
-  height: 150px;
+  width: 156px;
+  height: 156px;
   display: grid;
   place-items: center;
   text-align: center;
   border-radius: 999px;
-  background: var(--gold);
-  color: var(--gold-ink);
-  box-shadow: inset 0 0 0 5px var(--gold), inset 0 0 0 6.5px var(--gold-ink), 0 18px 40px -18px rgb(0 0 0 / 0.6);
+  background: var(--brown);
+  color: var(--cream);
+  box-shadow: inset 0 0 0 5px var(--brown), inset 0 0 0 6.5px var(--gold-soft), 0 20px 40px -18px rgb(40 15 5 / 0.6);
   animation: seal 560ms var(--ease-out) both;
   pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .steam, .settle { animation: none; }
-  .steam { opacity: 0; }
-  .press:active { transform: none; }
+  .steam { animation: none; opacity: 0; }
+  .press:active, .press-row:active { transform: none; }
   .seal { animation: none; transform: translate(-50%, -50%) rotate(-8deg); }
 }

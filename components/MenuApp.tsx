@@ -7,14 +7,14 @@ import { STORE } from "@/data/menu";
 import { bundledCatalog, liveCatalog, type Catalog } from "@/lib/catalog";
 import { getCatalog, resolveTable } from "@/lib/inbyte";
 import { flyToCart, haptic } from "@/lib/fly";
-import { S } from "@/lib/i18n";
+import { type Lang, LangCtx, STRINGS, categoryName, productName, useLang, useT } from "@/lib/i18n";
 import { cartReducer, lineKey, resolve, totals, type Customer, type Line, type Table } from "@/lib/order";
 import { CartBar } from "./CartBar";
 import { CartSheet } from "./CartSheet";
-import { Menu } from "./Menu";
+import { Favourites, Section } from "./Menu";
 import { StoreCtx, useStore, type Store } from "./store";
 
-const EASE = [0.23, 1, 0.32, 1] as const;
+const EXPO = [0.16, 1, 0.3, 1] as const;
 
 const read = <V,>(k: string, d: V): V => {
   try {
@@ -37,6 +37,8 @@ const TABLE_KEY = "sawa-table";
 const TABLE_TTL = 3 * 3600_000; // a table session ends after 3 hours
 
 export default function MenuApp() {
+  const [lang, setLangRaw] = useState<Lang>("ar");
+  const S = STRINGS[lang];
   const [lines, dispatch] = useReducer(cartReducer, [] as Line[]);
   const [catalog, setCatalog] = useState<Catalog>(bundledCatalog);
   const [customer, setCustomer] = useState<Customer>(EMPTY);
@@ -87,6 +89,24 @@ export default function MenuApp() {
       }
     }
   }, []);
+  // Language: remembered on this phone; the page turns to read left-to-right in English.
+  useEffect(() => {
+    const saved = read<Lang | null>("sawa-lang", null);
+    if (saved === "en" || saved === "ar") setLangRaw(saved);
+  }, []);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = STRINGS[lang].dir;
+    // "أنا" / "Me" follows the language; names people typed stay as they are.
+    setParty((p) => (p[0] === STRINGS.ar.me || p[0] === STRINGS.en.me ? [STRINGS[lang].me, ...p.slice(1)] : p));
+  }, [lang]);
+  const setLang = useCallback((l: Lang) => {
+    setLangRaw(l);
+    write("sawa-lang", l);
+    haptic(8);
+  }, []);
+  const langCtx = useMemo(() => ({ lang, setLang }), [lang, setLang]);
+
   useEffect(() => void (ready && write("sawa-cart", lines)), [lines, ready]);
   useEffect(() => void (ready && write("sawa-party", party)), [party, ready]);
   useEffect(() => void (ready && write("sawa-customer", customer)), [customer, ready]);
@@ -143,28 +163,38 @@ export default function MenuApp() {
   );
 
   return (
+    <LangCtx.Provider value={langCtx}>
     <StoreCtx.Provider value={store}>
       <MotionConfig reducedMotion="user">
-        <div className="mx-auto w-full max-w-[600px] overflow-x-clip px-4">
-          <Hero table={table?.label ?? ""} count={t.count} onOrder={() => setCartOpen(true)} />
-          <AnimatePresence>
-            {tableError && (
-              <motion.p role="alert" className="mt-6 bg-[var(--ground-2)] px-4 py-3 text-[15px]" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                {S.tableBad}
-              </motion.p>
-            )}
+        <Hero table={table?.label ?? ""} count={t.count} onOrder={() => setCartOpen(true)} />
+        <div className="relative z-10 -mt-8 rounded-t-[32px] bg-[var(--bg)]">
+          <div className="mx-auto w-full max-w-[600px] lg:max-w-[1120px] overflow-x-clip px-4 pt-8">
+            <Intro />
+            <AnimatePresence>
+              {tableError && (
+                <motion.p role="alert" className="mt-6 rounded-[20px] bg-[#f3d9d3] px-4 py-3 text-[15px] text-[#7d1f15]" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                  {S.tableBad}
+                </motion.p>
+              )}
+            </AnimatePresence>
+            <Favourites />
+          </div>
+          <CategoryBar />
+          <div className="mx-auto w-full max-w-[600px] lg:max-w-[1120px] overflow-x-clip px-4">
             {!canOrder && ready && (
-              <motion.p className="mt-6 bg-[var(--ground-2)] px-4 py-3 text-[15px] leading-relaxed text-[var(--muted)]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}>
+              <motion.p className="mt-6 rounded-[20px] bg-[var(--bg-2)] px-4 py-3 text-[15px] leading-relaxed text-[var(--muted)]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}>
                 {S.menuOnly}
               </motion.p>
             )}
-          </AnimatePresence>
-          <main className="pb-24">
-            <Menu />
-            <Together />
-          </main>
+            <main className="pb-16">
+              {catalog.categories.map((c) => (
+                <Section key={c.slug} category={c} />
+              ))}
+              <Together />
+            </main>
+          </div>
+          <Closing />
         </div>
-        <Closing />
 
         <CartBar ref={badgeRef} count={t.count} totalCents={t.totalCents} onOpen={() => setCartOpen(true)} />
         <CartSheet
@@ -179,190 +209,285 @@ export default function MenuApp() {
         />
       </MotionConfig>
     </StoreCtx.Provider>
+    </LangCtx.Provider>
   );
 }
 
-// First screen: two cups raised together (سوا), and the name below them,
-// large enough to be the building's sign.
+// First screen: two cups raised together (سوا), full bleed, and the name over
+// them. The photo opens from a close-up, the letters rise one by one, and on
+// scroll the photo sinks while the menu slides up over it.
 function Hero({ table, count, onOrder }: { table: string; count: number; onOrder: () => void }) {
+  const S = useT();
   return (
-    <header className="relative pt-[calc(env(safe-area-inset-top)+12px)]">
-      <div className="relative">
-        <div className="relative h-[56svh] min-h-[380px] overflow-hidden bg-[var(--brown)]">
-          <motion.img
-            src="/img/hero.webp"
-            alt="كوبايتين لاتيه بيتخبطوا في بعض"
-            width={1400}
-            height={933}
-            fetchPriority="high"
-            className="cups-drift absolute inset-0 h-full w-full object-cover"
-            initial={{ opacity: 0, scale: 1.08 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.4, ease: EASE }}
-          />
-          <nav className="absolute inset-x-0 top-0 z-10 flex items-center justify-between bg-[var(--ground)] px-4 py-1 text-[15px]">
-            <a href="#menu" className="press py-2.5 font-medium">
-              {S.menuWord}
-            </a>
-            <div className="flex items-center gap-4">
-              {table && <span className="text-[14px] text-[var(--gold)]">{table}</span>}
-              <button type="button" onClick={onOrder} className="press py-2.5 font-semibold text-[var(--ink)]">
-                {S.viewOrder}
-                {count > 0 && <span className="ms-1.5 text-[var(--gold)] num">{count}</span>}
-              </button>
-            </div>
-          </nav>
-        </div>
+    <header className="relative h-[86svh] min-h-[560px] overflow-hidden bg-[var(--black)] text-[var(--cream)]">
+      <div className="hero-photo absolute inset-0">
+        <motion.img
+          src="/img/hero.webp"
+          alt={S.heroAlt}
+          width={1400}
+          height={933}
+          fetchPriority="high"
+          className="h-full w-full object-cover"
+          initial={{ scale: 1.25, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.6, ease: EXPO }}
+        />
+      </div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgb(18_10_6/0.55),transparent_30%,transparent_45%,rgb(18_10_6/0.82))]" />
 
-        <h1 className="monument relative z-10 -mt-[11vw] origin-top text-center leading-none">
-          <span className="sr-only">سوا كوفي هاوس</span>
-          <span aria-hidden="true" dir="ltr" className="serif block text-[var(--gold)]" style={{ fontSize: "clamp(96px, 31vw, 186px)", letterSpacing: "-0.045em" }}>
+      <nav className="relative z-10 mx-auto flex max-w-[600px] lg:max-w-[1120px] items-center justify-between px-4 pt-[calc(env(safe-area-inset-top)+14px)]">
+        <motion.span className="serif text-[26px] leading-none text-[var(--gold-soft)]" dir="ltr" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EXPO, delay: 0.3 }}>
+          sawa
+        </motion.span>
+        <motion.div className="flex items-center gap-2" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EXPO, delay: 0.38 }}>
+          {table && <span className="rounded-full bg-[var(--cream)]/15 px-3 py-2 text-[14px]">{table}</span>}
+          <LangSwitch />
+          <button type="button" onClick={onOrder} className="press flex h-11 items-center gap-2 rounded-full bg-[var(--cream)] px-4 text-[15px] font-semibold text-[var(--ink)]">
+            {S.viewOrder}
+            <AnimatePresence mode="popLayout" initial={false}>
+              {count > 0 && (
+                <motion.span key={count} className="grid h-6 min-w-6 place-items-center rounded-full bg-[var(--brown)] px-1.5 text-[13px] text-[var(--cream)] num" initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.4, opacity: 0 }} transition={{ type: "spring", duration: 0.4, bounce: 0.3 }}>
+                  {count}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </motion.div>
+      </nav>
+
+      <div className="hero-name absolute inset-x-0 bottom-14 z-10 mx-auto max-w-[600px] lg:max-w-[1120px] origin-bottom px-4">
+        <h1>
+          <span className="sr-only">Sawa Coffee House سوا كوفي هاوس</span>
+          <span aria-hidden="true" dir="ltr" className="serif block text-center leading-[0.8] text-[var(--cream)]" style={{ fontSize: "clamp(110px, 36vw, 210px)", letterSpacing: "-0.05em" }}>
             {"sawa".split("").map((ch, i) => (
-              <motion.span
-                key={i}
-                className="inline-block"
-                initial={{ opacity: 0, y: "0.35em" }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.9, ease: EASE, delay: 0.45 + i * 0.07 }}
-              >
-                {ch}
-              </motion.span>
+              <span key={i} className="inline-block overflow-hidden pb-[0.08em] align-bottom">
+                <motion.span className="inline-block" initial={{ y: "105%" }} animate={{ y: 0 }} transition={{ duration: 1, ease: EXPO, delay: 0.25 + i * 0.06 }}>
+                  {ch}
+                </motion.span>
+              </span>
             ))}
           </span>
         </h1>
+        <motion.p className="mt-3 text-center text-[19px] font-medium text-[var(--cream)]/90" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EXPO, delay: 0.7 }}>
+          {S.tagline}
+        </motion.p>
       </div>
-
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EASE, delay: 0.85 }} className="mt-5">
-        <p className="text-[22px] font-semibold leading-snug">{S.tagline}</p>
-        <p className="mt-2 max-w-[34ch] text-[16px] leading-relaxed text-[var(--muted)]">{S.heroSub}</p>
-        <a href="#menu" className="press mt-6 flex h-14 items-center justify-between bg-[var(--gold)] px-5 text-[16px] font-semibold text-[var(--gold-ink)]">
-          افتح المنيو
-          <span className="serif text-[22px] leading-none num">12</span>
-        </a>
-      </motion.div>
     </header>
   );
 }
 
-// The live thing: the table's names as tabs. Whoever is selected is ordering;
-// everything added goes on their part of the bill.
+// Arabic / English. The label names the other language, in its own script.
+function LangSwitch() {
+  const { lang, setLang } = useLang();
+  const S = useT();
+  return (
+    <button type="button" onClick={() => setLang(lang === "ar" ? "en" : "ar")} aria-label={S.switchLabel} className="press relative grid h-11 min-w-11 place-items-center overflow-hidden rounded-full bg-[var(--cream)]/15 px-3 text-[15px] font-semibold">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span key={lang} initial={{ y: 18, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -18, opacity: 0 }} transition={{ duration: 0.3, ease: EXPO }}>
+          {S.switchTo}
+        </motion.span>
+      </AnimatePresence>
+    </button>
+  );
+}
+
+// What this is and what to do, right under the photo.
+function Intro() {
+  const S = useT();
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EXPO, delay: 0.85 }}>
+      <p className="max-w-[34ch] text-[18px] leading-relaxed">{S.heroSub}</p>
+      <div className="mt-5 grid grid-cols-2 gap-2">
+        <a href="#hot-coffee" className="press flex h-14 items-center justify-center rounded-full bg-[var(--brown)] text-[16px] font-semibold text-[var(--cream)]">
+          {S.seeMenu}
+        </a>
+        <a href="#together" className="press flex h-14 items-center justify-center rounded-full bg-[var(--bg-2)] text-[16px] font-semibold">
+          {S.togetherTitle}
+        </a>
+      </div>
+    </motion.div>
+  );
+}
+
+// Sticky section bar: a brown pill slides to the section on screen and the bar
+// keeps it centred.
+function CategoryBar() {
+  const S = useT();
+  const { lang } = useLang();
+  const { catalog } = useStore();
+  const [active, setActive] = useState(catalog.categories[0]?.slug);
+  const strip = useRef<HTMLDivElement>(null);
+  const jumping = useRef(false);
+
+  useEffect(() => {
+    const els = document.querySelectorAll<HTMLElement>("[data-section]");
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (jumping.current) return;
+        const hit = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (hit) setActive(hit.target.id);
+      },
+      { rootMargin: "-90px 0px -60% 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [catalog]);
+
+  useEffect(() => {
+    const chip = strip.current?.querySelector<HTMLElement>(`[data-tab="${active}"]`);
+    if (strip.current && chip) strip.current.scrollTo({ left: chip.offsetLeft - strip.current.clientWidth / 2 + chip.clientWidth / 2, behavior: "smooth" });
+  }, [active]);
+
+  const jump = (slug: string) => {
+    const el = document.getElementById(slug);
+    if (!el) return;
+    setActive(slug);
+    haptic(6);
+    jumping.current = true;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: "smooth" });
+    window.setTimeout(() => (jumping.current = false), 900);
+  };
+
+  return (
+    <nav className="sticky top-0 z-20 mt-12 bg-[var(--bg)] pb-2 pt-[calc(env(safe-area-inset-top)+10px)]" aria-label={S.sections}>
+      <div ref={strip} className="no-scrollbar mx-auto flex max-w-[600px] gap-1 overflow-x-auto px-4 lg:max-w-[1120px] [scroll-padding-inline:16px]">
+        {catalog.categories.map((c) => {
+          const on = c.slug === active;
+          return (
+            <button key={c.slug} data-tab={c.slug} type="button" onClick={() => jump(c.slug)} className="press relative h-11 shrink-0 rounded-full px-4 text-[15px] font-semibold">
+              {on && <motion.span layoutId="cat" className="absolute inset-0 rounded-full bg-[var(--brown)]" transition={{ type: "spring", duration: 0.45, bounce: 0.15 }} />}
+              <span className={`relative whitespace-nowrap transition-colors duration-200 ${on ? "text-[var(--cream)]" : "text-[var(--muted)]"}`}>{categoryName(c.ar, lang)}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
+// The live thing: the table's names. Whoever is selected is ordering; what
+// they add goes on their part of the bill.
 function Together() {
+  const S = useT();
   const { party, active, setActive, addPerson, removePerson, openOrder } = useStore();
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
-  const input = useRef<HTMLInputElement>(null);
 
   const submit = () => {
     const n = name.trim();
-    if (!n) return setAdding(false);
-    addPerson(n);
+    if (n) addPerson(n);
     setName("");
     setAdding(false);
   };
 
   return (
-    <section id="together" className="-mx-4 mt-28 bg-[var(--brown)] px-4 pb-10 pt-4">
-      <motion.div className="aspect-square overflow-hidden" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.8 }}>
-        <motion.img
-          src="/img/together.webp"
-          alt="فناجين قهوة على ترابيزة واحدة"
-          width={1100}
-          height={1650}
-          loading="lazy"
-          className="h-full w-full object-cover"
-          initial={{ scale: 1.12 }}
-          whileInView={{ scale: 1 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 1.4, ease: EASE }}
-        />
-      </motion.div>
-
-      <div className="no-scrollbar -mx-4 mt-6 flex gap-5 overflow-x-auto px-4 text-[17px]" role="tablist" aria-label={S.togetherTitle}>
-        {party.map((p, i) => {
-          const on = i === active;
-          return (
-            <span key={`${p}-${i}`} className="relative flex shrink-0 items-center">
-              <button type="button" role="tab" aria-selected={on} onClick={() => setActive(i)} className={`press relative pb-2 pt-1 font-semibold transition-colors duration-200 ${on ? "text-[var(--ink)]" : "text-[var(--muted)]"}`}>
-                {p}
-                {on && <motion.span layoutId="who" className="absolute inset-x-0 bottom-0 h-[3px] bg-[var(--gold)]" transition={{ type: "spring", duration: 0.4, bounce: 0.15 }} />}
-              </button>
-              {i > 0 && on && (
-                <button type="button" aria-label={S.remove(p)} onClick={() => removePerson(i)} className="press -me-2 ms-1 grid h-9 w-9 place-items-center text-[var(--muted)]">
-                  <X size={14} weight="bold" />
-                </button>
-              )}
-            </span>
-          );
-        })}
+    <section id="together" className="relative mt-20 overflow-hidden rounded-[32px] bg-[var(--brown)] text-[var(--cream)]">
+      <div className="relative h-[220px] overflow-hidden">
+        <img src="/img/together.webp" alt={S.togetherAlt} loading="lazy" className="drift absolute inset-0 h-full w-full object-cover" />
       </div>
+      <div className="relative px-5 pb-6 pt-6">
+        <motion.h2 className="text-[34px] font-bold leading-tight" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.8 }} transition={{ duration: 0.8, ease: EXPO }}>
+          {S.togetherTitle}
+        </motion.h2>
+        <p className="mt-2 max-w-[34ch] text-[16.5px] leading-relaxed text-[var(--cream)]/90">{S.togetherBody}</p>
 
-      <h2 className="mt-8 text-[34px] font-bold leading-tight">{S.togetherTitle}</h2>
-      <p className="mt-4 max-w-[34ch] text-[16px] leading-relaxed text-[var(--ink)]">{S.togetherBody}</p>
+        <div className="mt-6 flex flex-wrap gap-2" role="tablist" aria-label={S.togetherTitle}>
+          <AnimatePresence initial={false}>
+            {party.map((p, i) => {
+              const on = i === active;
+              return (
+                <motion.div
+                  key={`${p}-${i}`}
+                  layout
+                  className="relative flex items-center"
+                  initial={{ opacity: 0, scale: 0.6, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.6 }}
+                  transition={{ type: "spring", duration: 0.5, bounce: 0.25 }}
+                >
+                  <button type="button" role="tab" aria-selected={on} onClick={() => setActive(i)} className="press relative flex h-12 items-center gap-2 rounded-full pe-4 ps-1.5 text-[16px] font-semibold">
+                    {on && <motion.span layoutId="who" className="absolute inset-0 rounded-full bg-[var(--cream)]" transition={{ type: "spring", duration: 0.45, bounce: 0.15 }} />}
+                    {!on && <span className="absolute inset-0 rounded-full bg-[var(--cream)]/12" />}
+                    <span className={`relative grid h-9 w-9 place-items-center rounded-full text-[15px] ${on ? "bg-[var(--brown)] text-[var(--cream)]" : "bg-[var(--cream)]/20"}`}>{p.slice(0, 1)}</span>
+                    <span className={`relative transition-colors duration-200 ${on ? "text-[var(--ink)]" : ""}`}>{p}</span>
+                  </button>
+                  {i > 0 && on && (
+                    <button type="button" aria-label={S.remove(p)} onClick={() => removePerson(i)} className="press ms-1 grid h-10 w-10 place-items-center rounded-full bg-[var(--cream)]/12">
+                      <X size={14} weight="bold" />
+                    </button>
+                  )}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
 
-      <AnimatePresence initial={false} mode="wait">
-        {adding ? (
-          <motion.form
-            key="form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              submit();
-            }}
-            className="mt-8 flex"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: EASE }}
-          >
-            <label className="sr-only" htmlFor="friend">
-              {S.friendPh}
-            </label>
-            <input ref={input} id="friend" autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder={S.friendPh} maxLength={18} enterKeyHint="done" className="field field-dark h-[60px] flex-1" />
-            <button type="submit" className="press h-[60px] bg-[var(--gold)] px-6 text-[16px] font-semibold text-[var(--gold-ink)]">
-              {S.addFriend}
-            </button>
-          </motion.form>
-        ) : (
-          <motion.div key="cells" className="mt-8 grid grid-cols-2" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25, ease: EASE }}>
-            <button type="button" onClick={() => setAdding(true)} className="press flex h-[60px] items-center justify-center gap-2 bg-[var(--ink)] text-[16px] font-semibold text-[var(--ground)]">
-              <Plus size={16} weight="bold" />
-              {S.addFriend}
-            </button>
-            <button type="button" onClick={openOrder} className="press flex h-[60px] items-center justify-center bg-[var(--brown-2)] text-[16px] font-semibold">
-              {S.viewOrder}
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <AnimatePresence initial={false} mode="wait">
+          {adding ? (
+            <motion.form
+              key="form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                submit();
+              }}
+              className="mt-5 flex gap-2"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: EXPO }}
+            >
+              <label className="sr-only" htmlFor="friend">
+                {S.friendPh}
+              </label>
+              <input id="friend" autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder={S.friendPh} maxLength={18} enterKeyHint="done" className="field field-dark h-14 flex-1 rounded-full" />
+              <button type="submit" className="press h-14 rounded-full bg-[var(--cream)] px-6 text-[16px] font-semibold text-[var(--ink)]">
+                {S.addFriend}
+              </button>
+            </motion.form>
+          ) : (
+            <motion.div key="cells" className="mt-5 grid grid-cols-2 gap-2" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.3, ease: EXPO }}>
+              <button type="button" onClick={() => setAdding(true)} className="press flex h-14 items-center justify-center gap-2 rounded-full bg-[var(--cream)] text-[16px] font-semibold text-[var(--ink)]">
+                <Plus size={16} weight="bold" />
+                {S.addFriend}
+              </button>
+              <button type="button" onClick={openOrder} className="press flex h-14 items-center justify-center rounded-full bg-[var(--black)] text-[16px] font-semibold">
+                {S.viewOrder}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </section>
   );
 }
 
-// The close: inverse colours, their Instagram handle as display type, and the
-// name returning across the full width.
+// The close: black, their Instagram handle as display type, and the name
+// returning across the full width.
 function Closing() {
+  const S = useT();
   return (
-    <footer className="bg-[var(--paper)] text-[var(--paper-ink)]">
-      <div className="mx-auto flex min-h-[92svh] w-full max-w-[600px] flex-col px-4 pb-[calc(env(safe-area-inset-bottom)+96px)] pt-10">
-        <p className="max-w-[24ch] text-[19px] font-medium leading-snug">{S.opening}. تابعونا علشان تعرفوا الافتتاح وكل جديد.</p>
-        <a href={STORE.instagram} target="_blank" rel="noopener" dir="ltr" className="serif mt-auto block break-all leading-[0.95] transition-colors duration-200 hover:text-[#8a5a1c]" style={{ fontSize: "13.4vw" }}>
-          @{STORE.instagramHandle.replace("official", "")}
+    <footer className="rounded-t-[32px] bg-[var(--black)] text-[var(--cream)]">
+      <div className="mx-auto flex min-h-[80svh] w-full max-w-[600px] lg:max-w-[1120px] flex-col px-5 pb-[calc(env(safe-area-inset-bottom)+104px)] pt-10">
+        <p className="max-w-[26ch] text-[19px] leading-snug">{S.opening}</p>
+        <a href={STORE.instagram} target="_blank" rel="noopener" dir="ltr" className="serif mt-auto block leading-[0.95] text-[var(--gold-soft)] transition-colors duration-200 hover:text-[var(--cream)]" style={{ fontSize: "12.6vw" }}>
+          @sawacoffee
           <br />
           official
         </a>
-        <div className="mt-8 flex gap-6 text-[15px]">
-          <a href={STORE.instagram} target="_blank" rel="noopener" className="press flex items-center gap-1.5 py-2">
+        <div className="mt-6 flex gap-2 text-[15px]">
+          <a href={STORE.instagram} target="_blank" rel="noopener" className="press flex h-11 items-center gap-1.5 rounded-full bg-[var(--cream)]/10 px-4">
             <InstagramLogo size={18} weight="fill" /> Instagram
           </a>
-          <a href={STORE.facebook} target="_blank" rel="noopener" className="press flex items-center gap-1.5 py-2">
+          <a href={STORE.facebook} target="_blank" rel="noopener" className="press flex h-11 items-center gap-1.5 rounded-full bg-[var(--cream)]/10 px-4">
             <FacebookLogo size={18} weight="fill" /> Facebook
           </a>
         </div>
-        <svg viewBox="0 0 300 92" className="mt-10 block w-full" role="img" aria-label="sawa">
-          <text x="150" y="78" textAnchor="middle" className="serif" fill="var(--paper-ink)" style={{ fontSize: 112, letterSpacing: "-5px" }}>
+        <svg viewBox="0 0 300 96" className="mt-10 block w-full" role="img" aria-label="sawa">
+          <text x="150" y="80" textAnchor="middle" className="serif" fill="var(--cream)" style={{ fontSize: 118, letterSpacing: "-6px" }}>
             sawa
           </text>
         </svg>
-        <p className="mt-2 text-[13px] text-[var(--paper-muted)]">سوا كوفي هاوس. الصور من Unsplash.</p>
+        <p className="mt-2 text-[13px] text-[var(--cream-muted)]">{S.credit}</p>
       </div>
     </footer>
   );

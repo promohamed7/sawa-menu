@@ -26,13 +26,13 @@ export function flyToCart(from: DOMRect, src: string, target: HTMLElement | null
   Object.assign(inner.style, {
     width: "100%",
     height: "100%",
-    borderRadius: "0",
+    borderRadius: "14px",
     backgroundColor: "#1c140f",
     backgroundImage: `url(${src})`,
     backgroundSize: "cover",
     backgroundRepeat: "no-repeat",
     backgroundPosition: "center",
-    border: "2px solid #c9a35a",
+    border: "2px solid #f6efe4",
     boxShadow: "0 10px 24px -8px rgb(10 5 2 / 0.8)",
   });
   outer.appendChild(inner);

@@ -1,126 +1,150 @@
 "use client";
 
-import { Plus } from "@phosphor-icons/react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useState } from "react";
-import type { MenuCategory as Category, MenuProduct as Product } from "@/lib/catalog";
-import { haptic } from "@/lib/fly";
-import { S, money } from "@/lib/i18n";
+import { motion, useReducedMotion } from "motion/react";
+import { categoryName, money, productName, useLang, useT } from "@/lib/i18n";
+import type { MenuCategory, MenuProduct } from "@/lib/catalog";
 import { lineKey } from "@/lib/order";
 import { AddStepper } from "./Stepper";
 import { useStore } from "./store";
 
-const EASE = [0.23, 1, 0.32, 1] as const;
+const EXPO = [0.16, 1, 0.3, 1] as const;
 
-// The menu as one word filling the column, then a stack of filled bars that
-// open in place, like the folded pages of a menu card.
-export function Menu() {
+// The house favourites, by name; whatever the cashier calls them, they are
+// found by name so prices and ids stay the cashier's.
+const FAVOURITES = ["إسبانش لاتيه", "آيس لاتيه كريم بروليه", "آيس ماتشا فراولة", "ميلك شيك بستاشيو", "كرواسون روز بيف", "سان سبستيان"];
+
+export function Favourites() {
+  const S = useT();
   const { catalog } = useStore();
-  const [open, setOpen] = useState<Set<string>>(() => new Set([catalog.categories[0]?.slug]));
-  const toggle = (slug: string) => {
-    haptic(6);
-    setOpen((s) => {
-      const n = new Set(s);
-      if (n.has(slug)) n.delete(slug);
-      else n.add(slug);
-      return n;
-    });
-  };
-
+  const picks = FAVOURITES.map((n) => [...catalog.products.values()].find((h) => h.product.ar === n)).filter(Boolean) as { product: MenuProduct; category: MenuCategory }[];
+  if (!picks.length) return null;
   return (
-    <section id="menu" className="scroll-mt-4 pt-28 [container-type:inline-size]">
+    <section className="pt-16" aria-labelledby="fav-title">
       <motion.h2
-        className="font-bold leading-[0.95] text-[var(--ink)]"
-        style={{ fontSize: "37cqw" }}
-        initial={{ opacity: 0, y: 24 }}
+        id="fav-title"
+        className="text-[30px] font-bold leading-tight"
+        initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: 0.7, ease: EASE }}
+        viewport={{ once: true, amount: 0.8 }}
+        transition={{ duration: 0.8, ease: EXPO }}
       >
-        {S.menuWord}
+        {S.favourites}
       </motion.h2>
-      <ul className="mt-6 space-y-1.5">
-        {catalog.categories.map((c, i) => (
-          <Bar key={c.slug} category={c} index={i} open={open.has(c.slug)} onToggle={() => toggle(c.slug)} />
+      <div className="no-scrollbar -mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-[14vw] pb-4 [scroll-padding-inline:14vw]">
+        {picks.map(({ product, category }, i) => (
+          <FavCard key={product.id} product={product} img={category.img} index={i} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function FavCard({ product, img, index }: { product: MenuProduct; img: string; index: number }) {
+  const { lang } = useLang();
+  const S = useT();
+  const { add, qtyOf, setQty, active, canOrder } = useStore();
+  const orderable = canOrder && product.priceCents != null && product.available;
+  return (
+    <motion.article
+      className="w-[72vw] max-w-[320px] shrink-0 snap-center"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.9, ease: EXPO, delay: Math.min(index, 3) * 0.08 }}
+    >
+      <div className="lift overflow-hidden rounded-[28px] bg-[var(--black)] text-[var(--cream)]">
+        <div className="aspect-[4/5] overflow-hidden">
+          <img src={`/img/${img}.webp`} alt={productName(product.ar, lang)} loading="lazy" className="h-full w-full object-cover" />
+        </div>
+        <div className="flex items-center gap-3 p-4">
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-[17px] font-semibold">{productName(product.ar, lang)}</h3>
+            {product.priceCents != null && (
+              <p className="serif text-[24px] leading-tight text-[var(--gold-soft)] num">
+                {money(product.priceCents)} <span className="font-[family-name:var(--font-body)] text-[13px]">{S.currency}</span>
+              </p>
+            )}
+          </div>
+          {orderable && <AddStepper qty={qtyOf(product.id)} tone="dark" label={productName(product.ar, lang)} onAdd={(r) => add(product.id, r)} onSet={(n) => setQty(lineKey(product.id, active), n)} />}
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
+// Every section opens with its photograph, revealed from a mask, then its
+// items arrive row by row.
+export function Section({ category }: { category: MenuCategory }) {
+  const { lang } = useLang();
+  const S = useT();
+  const reduce = useReducedMotion();
+  return (
+    <section id={category.slug} data-section={category.slug} className="scroll-mt-[76px] pt-14 lg:grid lg:grid-cols-2 lg:items-start lg:gap-12">
+      <div className="relative h-[236px] overflow-hidden rounded-[28px] bg-[var(--black)] lg:sticky lg:top-24 lg:h-[460px]">
+        <motion.div
+          className="absolute inset-0"
+          initial={reduce ? false : { clipPath: "inset(16% 12% 16% 12% round 22px)", opacity: 0.4 }}
+          whileInView={{ clipPath: "inset(0% 0% 0% 0% round 0px)", opacity: 1 }}
+          viewport={{ once: true, amount: 0.35 }}
+          transition={{ duration: 1.2, ease: EXPO }}
+        >
+          <img src={`/img/${category.img}.webp`} alt="" loading="lazy" className="drift absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-[linear-gradient(to_top,rgb(18_10_6/0.78),transparent)]" />
+        </motion.div>
+        <div className="absolute inset-x-5 bottom-4 flex items-end justify-between gap-3 text-[var(--cream)]">
+          <motion.h2
+            className="text-[32px] font-bold leading-[1.15]"
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.9, ease: EXPO, delay: 0.2 }}
+          >
+            {categoryName(category.ar, lang)}
+          </motion.h2>
+          <span className="pb-1.5 text-[14px] text-[var(--cream-muted)]">{S.items(category.products.length)}</span>
+        </div>
+      </div>
+      <ul className="mt-3 lg:mt-0">
+        {category.products.map((p, i) => (
+          <Item key={p.id} product={p} index={i} />
         ))}
       </ul>
     </section>
   );
 }
 
-function Bar({ category, index, open, onToggle }: { category: Category; index: number; open: boolean; onToggle: () => void }) {
-  const reduce = useReducedMotion();
-  return (
-    <motion.li
-      id={category.slug}
-      className="bg-[var(--ground-2)]"
-      initial={reduce ? false : { opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.5, delay: Math.min(index, 6) * 0.05, ease: EASE }}
-    >
-      <button type="button" onClick={onToggle} aria-expanded={open} className="press-row flex h-14 w-full items-center gap-3 px-[18px] text-start">
-        <span className="flex-1 text-[16.5px] font-semibold">{category.ar}</span>
-        <span className="text-[14px] text-[var(--muted)]">{S.items(category.products.length)}</span>
-        <motion.span animate={{ rotate: open ? 45 : 0 }} transition={{ type: "spring", duration: 0.4, bounce: 0.2 }} className={open ? "text-[var(--gold)]" : "text-[var(--ink)]"}>
-          <Plus size={20} weight="regular" />
-        </motion.span>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="panel"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="px-[18px] pb-4">
-              <div className="aspect-[16/10] overflow-hidden">
-                <img src={`/img/${category.img}.webp`} alt={category.ar} loading="lazy" width={770} height={532} className="settle h-full w-full object-cover" />
-              </div>
-              <ul className="mt-2">
-                {category.products.map((p, i) => (
-                  <Item key={p.id} product={p} index={i} />
-                ))}
-              </ul>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.li>
-  );
-}
-
-function Item({ product, index }: { product: Product; index: number }) {
+function Item({ product, index }: { product: MenuProduct; index: number }) {
+  const { lang } = useLang();
+  const S = useT();
   const { add, qtyOf, setQty, active, canOrder } = useStore();
+  const reduce = useReducedMotion();
   const qty = qtyOf(product.id);
   const priced = product.priceCents != null;
   const orderable = canOrder && priced && product.available;
   return (
     <motion.li
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: 0.12 + Math.min(index, 10) * 0.025, ease: EASE }}
-      className="flex min-h-[60px] items-center gap-3 py-2"
+      initial={reduce ? false : { opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.6 }}
+      transition={{ duration: 0.6, ease: EXPO, delay: (index % 4) * 0.06 }}
     >
-      <button
-        type="button"
-        disabled={!orderable}
+      <div
+        role={orderable ? "button" : undefined}
+        tabIndex={orderable ? 0 : undefined}
         onClick={(e) => orderable && add(product.id, e.currentTarget.getBoundingClientRect())}
-        className={`flex min-w-0 flex-1 items-baseline gap-3 py-2 text-start disabled:cursor-default ${product.available ? "" : "opacity-60"}`}
+        onKeyDown={(e) => orderable && (e.key === "Enter" || e.key === " ") && add(product.id, e.currentTarget.getBoundingClientRect())}
+        className={`press-row flex min-h-[64px] items-center gap-3 rounded-[20px] px-3 py-2.5 transition-colors duration-300 ${qty ? "bg-[var(--bg-2)]" : ""} ${product.available ? "" : "opacity-55"}`}
       >
-        <span className="min-w-0 flex-1 text-[16px] leading-snug">{product.ar}</span>
+        <span className="min-w-0 flex-1 text-[17px] font-medium leading-snug">{productName(product.ar, lang)}</span>
         {!product.available ? (
-          <span className="shrink-0 text-[14px] text-[var(--muted)]">{S.soldOut}</span>
+          <span className="text-[14px] text-[var(--muted)]">{S.soldOut}</span>
         ) : priced ? (
-          <span className="serif shrink-0 text-[21px] leading-none text-[var(--ink)] num">{money(product.priceCents!)}</span>
+          <span className="serif shrink-0 text-[23px] leading-none num">{money(product.priceCents!)}</span>
         ) : (
           <span className="shrink-0 text-[14px] text-[var(--muted)]">{S.soon}</span>
         )}
-      </button>
-      {orderable && <AddStepper qty={qty} label={product.ar} onAdd={(r) => add(product.id, r)} onSet={(n) => setQty(lineKey(product.id, active), n)} />}
+        {orderable && <AddStepper qty={qty} label={productName(product.ar, lang)} onAdd={(r) => add(product.id, r)} onSet={(n) => setQty(lineKey(product.id, active), n)} />}
+      </div>
     </motion.li>
   );
 }

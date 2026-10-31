@@ -1,23 +1,42 @@
-// Arabic only. Prices keep the Western digits the printed menu uses.
-export const S = {
+"use client";
+
+import { createContext, useContext } from "react";
+import { CATEGORY_EN, PRODUCT_EN } from "@/data/en";
+
+// Arabic and English. Prices keep the Western digits the printed menu uses.
+// Orders reach the cashier in Arabic whichever language the guest reads.
+
+const AR = {
+  lang: "ar" as const,
+  dir: "rtl" as const,
+  switchTo: "EN",
+  switchLabel: "English",
   tagline: "قهوة تتشرب سوا",
   heroSub: "كوفي هاوس جديد. اختاروا من المنيو كله، كل واحد طلبه، والحساب يتقسم لوحده.",
-  menuWord: "المنيو",
+  seeMenu: "شوف المنيو",
+  favourites: "الأكثر طلبًا",
+  sections: "أقسام المنيو",
   currency: "ج",
-  add: "أضف",
   soon: "السعر قريبًا",
   soldOut: "خلص النهارده",
   menuOnly: "المنيو للعرض دلوقتي. الطلب من الموبايل هيشتغل أول ما الكاشير يتوصل.",
   tableBad: "كود الترابيزة مش شغال. اطلب من الكاشير أو امسح الكود تاني.",
   items: (n: number) => (n === 1 ? "صنف" : n === 2 ? "صنفين" : n <= 10 ? `${n} أصناف` : `${n} صنف`),
+  addOne: (n: string) => `أضف ${n}`,
+  lessOne: (n: string) => `شيل واحد ${n}`,
+  moreOne: (n: string) => `زود واحد ${n}`,
+  heroAlt: "كوبايتين لاتيه بيتخبطوا في بعض",
+  togetherAlt: "فناجين قهوة على ترابيزة واحدة",
   // the together feature
   togetherTitle: "اطلبوا سوا",
   togetherBody: "ضيفوا أسامي اللي على الترابيزة. اختار مين بيطلب، وكل حاجة تتضاف تتكتب باسمه، وفي الآخر كل واحد يعرف حسابه.",
   addFriend: "ضيف اسم",
   friendPh: "اسم صاحبك",
   me: "أنا",
+  orderingNow: "بيطلب",
   ordering: (n: string) => `بيطلب دلوقتي: ${n}`,
   remove: (n: string) => `شيل ${n}`,
+  table: (n: string) => n,
   // order
   viewOrder: "الطلب",
   order: "طلبكم",
@@ -46,6 +65,7 @@ export const S = {
   sendInvalid: "في صنف اتغير في المنيو. حدّث الصفحة وجرب تاني.",
   sent: "اتطلب",
   newOrder: "طلب جديد",
+  steps: "مراحل الطلب",
   status: {
     AWAITING_CAFE: "الطلب وصل، مستني الكاشير يستلمه",
     RECEIVED_BY_CAFE: "الطلب وصل للكاشير",
@@ -58,9 +78,96 @@ export const S = {
     CANCELLED: "الطلب اتلغى",
   } as Record<string, string>,
   orderNo: (n: string) => `رقم الطلب ${n}`,
-  follow: "تابعونا",
-  opening: "بنفتح قريب",
+  opening: "بنفتح قريب. تابعونا علشان تعرفوا الافتتاح وكل جديد.",
+  credit: "سوا كوفي هاوس. الصور من Unsplash.",
 };
+
+export type Strings = typeof AR;
+
+const EN: Strings = {
+  lang: "en" as unknown as "ar",
+  dir: "ltr" as unknown as "rtl",
+  switchTo: "ع",
+  switchLabel: "العربية",
+  tagline: "Coffee, better together",
+  heroSub: "A new coffee house. Order from the whole menu, everyone picks their own, and the bill splits itself.",
+  seeMenu: "See the menu",
+  favourites: "Most ordered",
+  sections: "Menu sections",
+  currency: "EGP",
+  soon: "Price soon",
+  soldOut: "Sold out today",
+  menuOnly: "The menu is for viewing for now. Ordering from your phone opens as soon as the cashier is connected.",
+  tableBad: "This table code isn't working. Order at the counter or scan the code again.",
+  items: (n: number) => (n === 1 ? "1 item" : `${n} items`),
+  addOne: (n: string) => `Add ${n}`,
+  lessOne: (n: string) => `One less ${n}`,
+  moreOne: (n: string) => `One more ${n}`,
+  heroAlt: "Two lattes raised together",
+  togetherAlt: "Coffee cups on one table",
+  togetherTitle: "Order together",
+  togetherBody: "Add the names at your table. Pick who's ordering, everything added goes under their name, and in the end everyone knows their share.",
+  addFriend: "Add a name",
+  friendPh: "Your friend's name",
+  me: "Me",
+  orderingNow: "Ordering",
+  ordering: (n: string) => `Ordering now: ${n}`,
+  remove: (n: string) => `Remove ${n}`,
+  table: (n: string) => n,
+  viewOrder: "Order",
+  order: "Your order",
+  emptyOrder: "Nothing ordered yet",
+  emptyOrderHint: "Open any section and pick",
+  share: (n: string) => `${n}'s share`,
+  pickup: "Takeaway from the café",
+  tableHere: (t: string) => `Ordering from ${t}`,
+  leaveTable: "Not at this table?",
+  name: "Name",
+  phone: "Mobile number",
+  optional: "optional",
+  notes: "Notes",
+  notesPh: "e.g. less sugar, skimmed milk",
+  total: "Total",
+  estimate: "The cashier confirms the final bill",
+  pay: "Pay cash at the café",
+  send: "Send order to the cashier",
+  sending: "Sending...",
+  retry: "Send the same order again",
+  nameErr: "Write your name (at least 2 letters)",
+  phoneErr: "Enter a valid Egyptian mobile number",
+  clearOrder: "Clear order",
+  sendFail: "The order wasn't sent, the connection dropped. Try again and it goes through only once.",
+  sendRejected: "The café isn't taking online orders right now. Please order at the counter.",
+  sendInvalid: "An item changed on the menu. Refresh the page and try again.",
+  sent: "Ordered",
+  newOrder: "New order",
+  steps: "Order progress",
+  status: {
+    AWAITING_CAFE: "Order received, waiting for the cashier",
+    RECEIVED_BY_CAFE: "The cashier has your order",
+    NOT_DELIVERED: "The order didn't reach the cashier in time and won't be charged. Order again or at the counter.",
+    ACCEPTED: "The cashier accepted your order",
+    PREPARING: "Your order is being prepared",
+    READY: "Your order is ready",
+    COMPLETED: "Served. Enjoy",
+    REJECTED: "The order was declined",
+    CANCELLED: "The order was cancelled",
+  },
+  orderNo: (n: string) => `Order ${n}`,
+  opening: "Opening soon. Follow us to hear about the opening and what's new.",
+  credit: "Sawa Coffee House. Photos from Unsplash.",
+};
+
+export const STRINGS = { ar: AR, en: EN };
+export type Lang = keyof typeof STRINGS;
+
+export const LangCtx = createContext<{ lang: Lang; setLang: (l: Lang) => void }>({ lang: "ar", setLang: () => {} });
+export const useLang = () => useContext(LangCtx);
+export const useT = () => STRINGS[useContext(LangCtx).lang];
+
+// The name to show: English when reading in English and a translation exists.
+export const productName = (ar: string, lang: Lang) => (lang === "en" ? (PRODUCT_EN[ar] ?? ar) : ar);
+export const categoryName = (ar: string, lang: Lang) => (lang === "en" ? (CATEGORY_EN[ar] ?? ar) : ar);
 
 export const money = (cents: number) => new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(cents / 100);
 export const fmt = (n: number) => String(n);
