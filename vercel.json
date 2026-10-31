@@ -1,0 +1,3 @@
+{
+  "rewrites": [{ "source": "/inbyte/:path*", "destination": "https://inbyte-menu-platform.vercel.app/api/public/v1/:path*" }]
+}

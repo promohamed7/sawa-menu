@@ -1,0 +1,625 @@
+{
+  "format": "inbyte-menu/v1",
+  "categories": [
+    {
+      "name": "قهوة ساخنة",
+      "products": [
+        {
+          "name": "إسبريسو",
+          "priceCents": 6500
+        },
+        {
+          "name": "كابتشينو",
+          "priceCents": 8500
+        },
+        {
+          "name": "لاتيه",
+          "priceCents": 8500
+        },
+        {
+          "name": "كورتادو",
+          "priceCents": 9000
+        },
+        {
+          "name": "فلات وايت",
+          "priceCents": 10000
+        },
+        {
+          "name": "موكا",
+          "priceCents": 11000
+        },
+        {
+          "name": "وايت موكا",
+          "priceCents": 11000
+        },
+        {
+          "name": "إسبانش لاتيه",
+          "priceCents": 11000
+        },
+        {
+          "name": "لاتيه بستاشيو",
+          "priceCents": 11000
+        },
+        {
+          "name": "لاتيه لوتس",
+          "priceCents": 11000
+        },
+        {
+          "name": "لاتيه فانيليا مملح",
+          "priceCents": 9000
+        },
+        {
+          "name": "لاتيه كراميل مملح",
+          "priceCents": 9000
+        },
+        {
+          "name": "أمريكانو",
+          "priceCents": 8000
+        },
+        {
+          "name": "قهوة تركي",
+          "priceCents": 2000
+        },
+        {
+          "name": "قهوة تركي دابل",
+          "priceCents": 4500
+        },
+        {
+          "name": "قهوة فرنساوي",
+          "priceCents": 5000
+        },
+        {
+          "name": "قهوة بندق",
+          "priceCents": 5000
+        }
+      ]
+    },
+    {
+      "name": "قهوة مثلجة",
+      "products": [
+        {
+          "name": "آيس لاتيه",
+          "priceCents": 12000
+        },
+        {
+          "name": "آيس إسبانش لاتيه",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس لاتيه كراميل مملح",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس لاتيه بلح فانيليا",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس موكا",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس وايت موكا",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس أمريكانو",
+          "priceCents": 9000
+        },
+        {
+          "name": "آيس لاتيه كريم بروليه",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس سولتيد لوتس لاتيه",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس ترمسيو لاتيه",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس أورنج إسبريسو",
+          "priceCents": 12000
+        },
+        {
+          "name": "بنانا بريد لاتيه",
+          "priceCents": 13500
+        }
+      ]
+    },
+    {
+      "name": "مشروبات ساخنة",
+      "products": [
+        {
+          "name": "شاي",
+          "priceCents": 2000
+        },
+        {
+          "name": "بلاك فوريست هوت شوكليت",
+          "priceCents": 10000
+        },
+        {
+          "name": "هوت وايت شوكليت مع الراسبيري",
+          "priceCents": 11000
+        },
+        {
+          "name": "هوت سولتيد لوتس",
+          "priceCents": 11000
+        },
+        {
+          "name": "كيندر هوت شوكليت",
+          "priceCents": 11000
+        },
+        {
+          "name": "ترمسيو لاتيه",
+          "priceCents": 11000
+        },
+        {
+          "name": "موكا بندق",
+          "priceCents": 11000
+        },
+        {
+          "name": "هوت شوكليت دبي",
+          "priceCents": 11000
+        },
+        {
+          "name": "بستاشيو وايت شوكليت",
+          "priceCents": 11000
+        },
+        {
+          "name": "كريم بروليه لاتيه",
+          "priceCents": 11000
+        },
+        {
+          "name": "هوت وايت شوكليت جوز هند",
+          "priceCents": 11000
+        },
+        {
+          "name": "سحلب أورنج",
+          "priceCents": 11000
+        }
+      ]
+    },
+    {
+      "name": "فرابيه",
+      "products": [
+        {
+          "name": "فرابتشينو",
+          "priceCents": 13500
+        },
+        {
+          "name": "فرابيه موكا",
+          "priceCents": 13500
+        },
+        {
+          "name": "فرابيه وايت موكا",
+          "priceCents": 13500
+        },
+        {
+          "name": "فرابيه سولتيد كراميل",
+          "priceCents": 13500
+        },
+        {
+          "name": "فرابيه فانيليا بلح",
+          "priceCents": 13500
+        }
+      ]
+    },
+    {
+      "name": "الماتشا",
+      "products": [
+        {
+          "name": "آيس ماتشا",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس ماتشا جوز هند",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس ماتشا فراولة",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس ماتشا بلوبيري",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس ماتشا بطاطا",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس ماتشا مانجو",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس ماتشا سولتيد كراميل",
+          "priceCents": 13500
+        },
+        {
+          "name": "آيس ماتشا بستاشيو",
+          "priceCents": 14000
+        }
+      ]
+    },
+    {
+      "name": "الميلك شيك",
+      "products": [
+        {
+          "name": "ميلك شيك فانيليا",
+          "priceCents": 14000
+        },
+        {
+          "name": "ميلك شيك شوكليت",
+          "priceCents": 14000
+        },
+        {
+          "name": "ميلك شيك مانجو",
+          "priceCents": 14000
+        },
+        {
+          "name": "ميلك شيك فراولة",
+          "priceCents": 14000
+        },
+        {
+          "name": "ميلك شيك توت",
+          "priceCents": 14000
+        },
+        {
+          "name": "ميلك شيك كيندر",
+          "priceCents": 14000
+        },
+        {
+          "name": "ميلك شيك أوريو",
+          "priceCents": 14000
+        },
+        {
+          "name": "ميلك شيك سولتيد كراميل بريتزل",
+          "priceCents": 14000
+        },
+        {
+          "name": "ميلك شيك بستاشيو",
+          "priceCents": 15000
+        }
+      ]
+    },
+    {
+      "name": "سموزي",
+      "products": [
+        {
+          "name": "سموزي بطيخ",
+          "priceCents": 10000
+        },
+        {
+          "name": "سموزي مانجو",
+          "priceCents": 10000
+        },
+        {
+          "name": "سموزي فراولة",
+          "priceCents": 10000
+        },
+        {
+          "name": "سموزي خوخ",
+          "priceCents": 10000
+        },
+        {
+          "name": "سموزي بلوبيري",
+          "priceCents": 10000
+        },
+        {
+          "name": "سموزي راسبيري",
+          "priceCents": 10000
+        },
+        {
+          "name": "سموزي فراولة موز",
+          "priceCents": 11000
+        },
+        {
+          "name": "سموزي مانجو باشون",
+          "priceCents": 11000
+        },
+        {
+          "name": "سموزي ميكس بيري",
+          "priceCents": 11000
+        }
+      ]
+    },
+    {
+      "name": "عصائر فريش",
+      "products": [
+        {
+          "name": "مانجو",
+          "priceCents": 8000
+        },
+        {
+          "name": "برتقال",
+          "priceCents": 8000
+        },
+        {
+          "name": "جوافة",
+          "priceCents": 8000
+        },
+        {
+          "name": "فراولة",
+          "priceCents": 8000
+        },
+        {
+          "name": "بطيخ",
+          "priceCents": 8000
+        },
+        {
+          "name": "موز بلبن",
+          "priceCents": 8000
+        },
+        {
+          "name": "بلح",
+          "priceCents": 8000
+        },
+        {
+          "name": "رمان",
+          "priceCents": 8000
+        },
+        {
+          "name": "يوسفي",
+          "priceCents": 8000
+        },
+        {
+          "name": "ليمون",
+          "priceCents": 6500
+        },
+        {
+          "name": "ليمون نعناع",
+          "priceCents": 6500
+        },
+        {
+          "name": "أناناس",
+          "priceCents": 10000
+        },
+        {
+          "name": "كيوي",
+          "priceCents": 11000
+        },
+        {
+          "name": "أفوكادو",
+          "priceCents": 16000
+        }
+      ]
+    },
+    {
+      "name": "كوكتيلات صودا",
+      "products": [
+        {
+          "name": "بلو أوشن",
+          "priceCents": 11000
+        },
+        {
+          "name": "باشون صن سيت",
+          "priceCents": 11000
+        },
+        {
+          "name": "جرين أبل",
+          "priceCents": 11000
+        },
+        {
+          "name": "تروبيكال جولد",
+          "priceCents": 11000
+        },
+        {
+          "name": "كوكو باين فيز",
+          "priceCents": 11000
+        },
+        {
+          "name": "شيري كولا تويست",
+          "priceCents": 11000
+        },
+        {
+          "name": "فراولة راش",
+          "priceCents": 14000
+        },
+        {
+          "name": "بلو ريد",
+          "priceCents": 14000
+        },
+        {
+          "name": "وتر ميلون إنرجي",
+          "priceCents": 14000
+        }
+      ]
+    },
+    {
+      "name": "المخبوزات والسندوتشات",
+      "products": [
+        {
+          "name": "كرواسون تركي مدخن",
+          "priceCents": 15000
+        },
+        {
+          "name": "كرواسون روز بيف",
+          "priceCents": 15000
+        },
+        {
+          "name": "كرواسون أومليت ميكس تشيز",
+          "priceCents": 17000
+        },
+        {
+          "name": "كرواسون أومليت بسطرمة",
+          "priceCents": 17000
+        },
+        {
+          "name": "كرواسون ميكس تشيز",
+          "priceCents": 15000
+        },
+        {
+          "name": "كرواسون سوسيس",
+          "priceCents": 10000
+        },
+        {
+          "name": "كرواسون زعتر",
+          "priceCents": 8000
+        },
+        {
+          "name": "كرواسون سادة",
+          "priceCents": 7500
+        },
+        {
+          "name": "بانيه جبنة",
+          "priceCents": 7500
+        },
+        {
+          "name": "سندوتش تركي مدخن",
+          "priceCents": 14000
+        },
+        {
+          "name": "سندوتش روز بيف",
+          "priceCents": 14000
+        },
+        {
+          "name": "سندوتش أومليت ميكس تشيز",
+          "priceCents": 16000
+        },
+        {
+          "name": "سندوتش أومليت بسطرمة",
+          "priceCents": 16000
+        },
+        {
+          "name": "سندوتش ميكس تشيز",
+          "priceCents": 14000
+        },
+        {
+          "name": "بان سويس تركي",
+          "priceCents": 11000
+        },
+        {
+          "name": "بان سويس شوكليت",
+          "priceCents": 11000
+        },
+        {
+          "name": "دانش فستق",
+          "priceCents": 11000
+        },
+        {
+          "name": "دانش بلح",
+          "priceCents": 10000
+        }
+      ]
+    },
+    {
+      "name": "الديزرت",
+      "products": [
+        {
+          "name": "كيك الجزر",
+          "priceCents": 10000
+        },
+        {
+          "name": "تشيز كيك",
+          "priceCents": 10000
+        },
+        {
+          "name": "ريد فلفت",
+          "priceCents": 10000
+        },
+        {
+          "name": "ترمسيو",
+          "priceCents": 10000
+        },
+        {
+          "name": "كيك العسل",
+          "priceCents": 10000
+        },
+        {
+          "name": "إكلير شوكليت",
+          "priceCents": 10000
+        },
+        {
+          "name": "إكلير لوتس",
+          "priceCents": 10000
+        },
+        {
+          "name": "ميلفيه سكر",
+          "priceCents": 10000
+        },
+        {
+          "name": "ميلفيه شوكليت",
+          "priceCents": 10000
+        },
+        {
+          "name": "شوكليت فادج",
+          "priceCents": 10000
+        },
+        {
+          "name": "متيلدا شوكليت",
+          "priceCents": 17000
+        },
+        {
+          "name": "سان سبستيان",
+          "priceCents": 17000
+        },
+        {
+          "name": "كرواسون نيوتيلا",
+          "priceCents": 12000
+        },
+        {
+          "name": "كرواسون لوتس",
+          "priceCents": 12000
+        },
+        {
+          "name": "مافن بلوبيري",
+          "priceCents": 9000
+        },
+        {
+          "name": "مافن شوكليت",
+          "priceCents": 9000
+        },
+        {
+          "name": "مافن فانيليا",
+          "priceCents": 9000
+        },
+        {
+          "name": "مافن فراولة",
+          "priceCents": 9000
+        }
+      ]
+    },
+    {
+      "name": "الإضافات",
+      "products": [
+        {
+          "name": "صوص",
+          "priceCents": 1000
+        },
+        {
+          "name": "شيدر أحمر",
+          "priceCents": 3500
+        },
+        {
+          "name": "شيدر أصفر",
+          "priceCents": 3500
+        },
+        {
+          "name": "جبنة إمنتال",
+          "priceCents": 3500
+        },
+        {
+          "name": "جبنة جودة",
+          "priceCents": 3500
+        },
+        {
+          "name": "تركي مدخن",
+          "priceCents": 4000
+        },
+        {
+          "name": "روز بيف",
+          "priceCents": 5000
+        },
+        {
+          "name": "خس",
+          "priceCents": 500
+        },
+        {
+          "name": "طماطم",
+          "priceCents": 500
+        }
+      ]
+    }
+  ]
+}

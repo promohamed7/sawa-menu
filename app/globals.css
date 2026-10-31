@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+/* The room: black, burnt brown, light beige; the gold of the cup rims and the name. */
+:root {
+  --ground: #100b08;
+  --ground-2: #1c140f;
+  --ground-3: #2a1e16;
+  --brown: #4a2a19;
+  --brown-2: #5a3521;
+  --ink: #efe4d2;
+  --muted: #bcab91;
+  --gold: #c9a35a;
+  --gold-ink: #1a1108;
+  --paper: #ece2d0;
+  --paper-2: #e2d5bf;
+  --paper-ink: #1a120c;
+  --paper-muted: #5e4b3a;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  color-scheme: dark;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  background: var(--ground);
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  min-height: 100dvh;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  caret-color: var(--gold);
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--gold-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* The name's face: the serif of their sign */
+.serif {
+  font-family: var(--font-serif), serif;
+  font-weight: 500;
+}
+.num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.press {
+  transition: transform 160ms var(--ease-out), background-color 200ms ease, color 200ms ease;
+  touch-action: manipulation;
+  user-select: none;
+}
+.press:active {
+  transform: scale(0.97);
+}
+.press-row {
+  transition: background-color 200ms ease;
+  touch-action: manipulation;
+}
+.press-row:active {
+  background-color: var(--ground-3);
+}
+
+/* The monument: the name settles as the first screen leaves */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .monument {
+      animation: monument linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 70vh;
+    }
+    .cups-drift {
+      animation: cups-drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 70vh;
+    }
+  }
+}
+@keyframes monument {
+  to { transform: scale(0.93) translateY(-2vh); }
+}
+@keyframes cups-drift {
+  to { transform: translateY(6vh) scale(1.04); }
+}
+
+/* Steam off the cups */
+@keyframes steam {
+  0% { transform: translateY(14px) scaleY(0.8); opacity: 0; }
+  30% { opacity: 0.55; }
+  100% { transform: translateY(-34px) scaleY(1.15); opacity: 0; }
+}
+.steam {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: steam 3.6s var(--ease-out) infinite;
+}
+
+/* Photo inside an opened menu bar eases from close-up to rest */
+@keyframes settle {
+  from { transform: scale(1.12); }
+  to { transform: scale(1); }
+}
+.settle {
+  animation: settle 1.1s var(--ease-out) both;
+}
+
+.field {
+  width: 100%;
+  background: #f7f0e3;
+  color: var(--paper-ink);
+  border: 0;
+  border-radius: 0;
+  padding: 13px 14px;
+  font: inherit;
+  font-size: 16px;
+  box-shadow: inset 0 0 0 1.5px transparent;
+  transition: box-shadow 160ms ease;
+}
+.field::placeholder {
+  color: #7b6652;
+}
+.field:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px #9a7426;
+}
+.field[aria-invalid="true"] {
+  box-shadow: inset 0 0 0 2px #a3281a;
+}
+.field-dark {
+  background: var(--ground-3);
+  color: var(--ink);
+}
+.field-dark::placeholder {
+  color: var(--muted);
+}
+
+/* Gold seal pressed onto the order when it is sent */
+@keyframes seal {
+  0% { transform: translate(-50%, -50%) scale(1.8) rotate(-24deg); opacity: 0; }
+  60% { transform: translate(-50%, -50%) scale(0.94) rotate(-8deg); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(-8deg); opacity: 1; }
+}
+.seal {
+  position: absolute;
+  top: 36%;
+  left: 50%;
+  width: 150px;
+  height: 150px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--gold-ink);
+  box-shadow: inset 0 0 0 5px var(--gold), inset 0 0 0 6.5px var(--gold-ink), 0 18px 40px -18px rgb(0 0 0 / 0.6);
+  animation: seal 560ms var(--ease-out) both;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .steam, .settle { animation: none; }
+  .steam { opacity: 0; }
+  .press:active { transform: none; }
+  .seal { animation: none; transform: translate(-50%, -50%) rotate(-8deg); }
+}
