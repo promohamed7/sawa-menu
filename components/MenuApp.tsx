@@ -174,7 +174,7 @@ export default function MenuApp() {
         <div className="relative z-10 -mt-8 rounded-t-[32px] bg-[var(--bg)]">
           <Watermark />
           <div className="mx-auto w-full max-w-[600px] lg:max-w-[1120px] overflow-x-clip px-4 pt-8">
-            <Intro canOrder={canOrder} />
+            <Intro />
             <AnimatePresence>
               {tableError && (
                 <motion.p role="alert" className="mt-6 rounded-[20px] bg-[#f3d9d3] px-4 py-3 text-[15px] text-[#7d1f15]" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
@@ -319,12 +319,11 @@ function Watermark() {
 }
 
 // What this is and what to do, right under the photo.
-function Intro({ canOrder }: { canOrder: boolean }) {
+function Intro() {
   const S = useT();
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EXPO, delay: 0.85 }}>
-      <p className="max-w-[34ch] text-[18px] leading-relaxed">{canOrder ? S.heroSubOrder : S.heroSub}</p>
-      <a href="#hot-coffee" className="press mt-5 flex h-14 items-center justify-center rounded-full bg-[var(--brown)] text-[16px] font-semibold text-[var(--cream)]">
+      <a href="#hot-coffee" className="press flex h-14 items-center justify-center rounded-full bg-[var(--brown)] text-[16px] font-semibold text-[var(--cream)]">
         {S.seeMenu}
       </a>
     </motion.div>

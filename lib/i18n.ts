@@ -12,8 +12,6 @@ const AR = {
   switchTo: "EN",
   switchLabel: "English",
   tagline: "كوفي هاوس",
-  heroSub: "كوفي هاوس جديد. قهوة ساخنة ومثلجة، ماتشا، عصاير، مخبوزات وديزرت. شوف المنيو واطلب من الكاشير.",
-  heroSubOrder: "كوفي هاوس جديد. قهوة ساخنة ومثلجة، ماتشا، عصاير، مخبوزات وديزرت. اختار واطلب من موبايلك.",
   seeMenu: "شوف المنيو",
   favourites: "الأكثر طلبًا",
   sections: "أقسام المنيو",
@@ -91,8 +89,6 @@ const EN: Strings = {
   switchTo: "ع",
   switchLabel: "العربية",
   tagline: "Coffee and more",
-  heroSub: "A new coffee house. Hot and iced coffee, matcha, juices, bakery and desserts. Browse the menu and order at the counter.",
-  heroSubOrder: "A new coffee house. Hot and iced coffee, matcha, juices, bakery and desserts. Pick and order from your phone.",
   seeMenu: "See the menu",
   favourites: "Most ordered",
   sections: "Menu sections",
@@ -169,7 +165,9 @@ export const useT = () => STRINGS[useContext(LangCtx).lang];
 
 // The name to show: English when reading in English and a translation exists.
 export const productName = (ar: string, lang: Lang) => (lang === "en" ? (PRODUCT_EN[ar] ?? ar) : ar);
-export const categoryName = (ar: string, lang: Lang) => (lang === "en" ? (CATEGORY_EN[ar] ?? ar) : ar);
+// Arabic display names that differ from the cashier's section name.
+const CATEGORY_AR: Record<string, string> = { "قهوة ساخنة": "قهوة" };
+export const categoryName = (ar: string, lang: Lang) => (lang === "en" ? (CATEGORY_EN[ar] ?? ar) : (CATEGORY_AR[ar] ?? ar));
 
 export const money = (cents: number) => new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(cents / 100);
 export const fmt = (n: number) => String(n);
