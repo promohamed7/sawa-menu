@@ -172,6 +172,7 @@ export default function MenuApp() {
       <MotionConfig reducedMotion="user">
         <Hero table={table?.label ?? ""} count={t.count} canOrder={canOrder} onOrder={() => setCartOpen(true)} />
         <div className="relative z-10 -mt-8 rounded-t-[32px] bg-[var(--bg)]">
+          <Watermark />
           <div className="mx-auto w-full max-w-[600px] lg:max-w-[1120px] overflow-x-clip px-4 pt-8">
             <Intro canOrder={canOrder} />
             <AnimatePresence>
@@ -293,6 +294,27 @@ function LangSwitch() {
         </motion.span>
       </AnimatePresence>
     </button>
+  );
+}
+
+// The beige ground carries the name as a faint watermark, set in staggered
+// diagonal rows like monogrammed paper. It scrolls with the menu and sits
+// behind everything (negative z inside the panel's stacking context).
+function Watermark() {
+  return (
+    <svg aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 h-full w-full overflow-hidden rounded-t-[32px]">
+      <defs>
+        <pattern id="sawa-mark" width="200" height="132" patternUnits="userSpaceOnUse" patternTransform="rotate(-16)">
+          <text x="10" y="44" direction="ltr" className="serif" fill="var(--brown)" fillOpacity="0.075" style={{ fontSize: 34, letterSpacing: "-1px" }}>
+            sawa
+          </text>
+          <text x="110" y="110" direction="ltr" className="serif" fill="var(--brown)" fillOpacity="0.075" style={{ fontSize: 34, letterSpacing: "-1px" }}>
+            sawa
+          </text>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#sawa-mark)" />
+    </svg>
   );
 }
 
