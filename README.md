@@ -1,7 +1,7 @@
 # Sawa Coffee House menu
 
 Mobile-first digital menu for Sawa Coffee House. Next.js static export on Vercel.
-Orders go straight to Sawa's **INBYTE Café** cashier.
+The menu (names, prices, sold-out) comes live from Sawa's **INBYTE Café** cashier. Sawa takes orders at the counter, so ordering from the phone is off; turning on «Online ordering» in INBYTE Admin (Café → Ordering) switches it on here with no code change, and orders then go straight to the cashier.
 
 ## How ordering reaches the cashier
 

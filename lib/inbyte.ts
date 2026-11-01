@@ -26,6 +26,7 @@ async function call<T>(path: string, init?: RequestInit, timeoutMs = 12000): Pro
 }
 
 export const getCatalog = () => call<unknown>("/catalog");
+export const getConfig = () => call<{ features?: { onlineOrdering?: boolean } }>("/config");
 export const resolveTable = (token: string) => call<{ tableLabel: string }>("/tables/resolve", { method: "POST", body: JSON.stringify({ token }) });
 
 export type OrderPayload = {

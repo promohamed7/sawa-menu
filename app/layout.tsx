@@ -7,7 +7,7 @@ const body = El_Messiri({ subsets: ["arabic", "latin"], weight: ["400", "500", "
 
 export const metadata: Metadata = {
   title: "سوا كوفي هاوس | المنيو",
-  description: "منيو سوا كوفي هاوس: قهوة ساخنة ومثلجة، ماتشا، سموزي، مخبوزات وديزرت. اطلبوا سوا من الموبايل.",
+  description: "منيو سوا كوفي هاوس: قهوة ساخنة ومثلجة، ماتشا، سموزي، مخبوزات وديزرت. كوفي هاوس جديد.",
   icons: { icon: "/icon.png", apple: "/icon.png" },
   openGraph: { title: "سوا كوفي هاوس", description: "قهوة تتشرب سوا", images: ["/img/og.jpg"] },
 };

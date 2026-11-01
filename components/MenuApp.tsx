@@ -5,7 +5,7 @@ import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { STORE } from "@/data/menu";
 import { bundledCatalog, liveCatalog, type Catalog } from "@/lib/catalog";
-import { getCatalog, resolveTable } from "@/lib/inbyte";
+import { getCatalog, getConfig, resolveTable } from "@/lib/inbyte";
 import { flyToCart, haptic } from "@/lib/fly";
 import { type Lang, LangCtx, STRINGS, categoryName, productName, useLang, useT } from "@/lib/i18n";
 import { cartReducer, lineKey, resolve, totals, type Customer, type Line, type Table } from "@/lib/order";
@@ -58,6 +58,7 @@ export default function MenuApp() {
     setCustomer({ ...EMPTY, ...read<Partial<Customer>>("sawa-customer", {}) });
     setReady(true);
 
+    getConfig().then((r) => setOrderingOn(r.ok && r.data?.features?.onlineOrdering === true));
     getCatalog().then((r) => {
       const live = r.ok ? liveCatalog(r.data as Parameters<typeof liveCatalog>[0]) : null;
       if (live) setCatalog(live);
@@ -111,7 +112,10 @@ export default function MenuApp() {
   useEffect(() => void (ready && write("sawa-party", party)), [party, ready]);
   useEffect(() => void (ready && write("sawa-customer", customer)), [customer, ready]);
 
-  const canOrder = catalog.source === "live";
+  // Ordering from the phone is a switch in INBYTE Admin (Café → Ordering → Online ordering).
+  // Off, the page is the menu only and guests order from the cashier.
+  const [orderingOn, setOrderingOn] = useState(false);
+  const canOrder = catalog.source === "live" && orderingOn;
   const resolved = useMemo(() => resolve(lines, catalog), [lines, catalog]);
   const t = useMemo(() => totals(resolved), [resolved]);
   const qtyMap = useMemo(() => new Map(lines.map((l) => [lineKey(l.productId, l.who), l.qty])), [lines]);
@@ -166,10 +170,10 @@ export default function MenuApp() {
     <LangCtx.Provider value={langCtx}>
     <StoreCtx.Provider value={store}>
       <MotionConfig reducedMotion="user">
-        <Hero table={table?.label ?? ""} count={t.count} onOrder={() => setCartOpen(true)} />
+        <Hero table={table?.label ?? ""} count={t.count} canOrder={canOrder} onOrder={() => setCartOpen(true)} />
         <div className="relative z-10 -mt-8 rounded-t-[32px] bg-[var(--bg)]">
           <div className="mx-auto w-full max-w-[600px] lg:max-w-[1120px] overflow-x-clip px-4 pt-8">
-            <Intro />
+            <Intro canOrder={canOrder} />
             <AnimatePresence>
               {tableError && (
                 <motion.p role="alert" className="mt-6 rounded-[20px] bg-[#f3d9d3] px-4 py-3 text-[15px] text-[#7d1f15]" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
@@ -190,7 +194,6 @@ export default function MenuApp() {
               {catalog.categories.map((c) => (
                 <Section key={c.slug} category={c} />
               ))}
-              <Together />
             </main>
           </div>
           <Closing />
@@ -216,7 +219,7 @@ export default function MenuApp() {
 // First screen: two cups raised together (سوا), full bleed, and the name over
 // them. The photo opens from a close-up, the letters rise one by one, and on
 // scroll the photo sinks while the menu slides up over it.
-function Hero({ table, count, onOrder }: { table: string; count: number; onOrder: () => void }) {
+function Hero({ table, count, canOrder, onOrder }: { table: string; count: number; canOrder: boolean; onOrder: () => void }) {
   const S = useT();
   return (
     <header className="relative h-[86svh] min-h-[560px] overflow-hidden bg-[var(--black)] text-[var(--cream)]">
@@ -242,6 +245,7 @@ function Hero({ table, count, onOrder }: { table: string; count: number; onOrder
         <motion.div className="flex items-center gap-2" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EXPO, delay: 0.38 }}>
           {table && <span className="rounded-full bg-[var(--cream)]/15 px-3 py-2 text-[14px]">{table}</span>}
           <LangSwitch />
+          {canOrder && (
           <button type="button" onClick={onOrder} className="press flex h-11 items-center gap-2 rounded-full bg-[var(--cream)] px-4 text-[15px] font-semibold text-[var(--ink)]">
             {S.viewOrder}
             <AnimatePresence mode="popLayout" initial={false}>
@@ -252,6 +256,7 @@ function Hero({ table, count, onOrder }: { table: string; count: number; onOrder
               )}
             </AnimatePresence>
           </button>
+          )}
         </motion.div>
       </nav>
 
@@ -292,19 +297,14 @@ function LangSwitch() {
 }
 
 // What this is and what to do, right under the photo.
-function Intro() {
+function Intro({ canOrder }: { canOrder: boolean }) {
   const S = useT();
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EXPO, delay: 0.85 }}>
-      <p className="max-w-[34ch] text-[18px] leading-relaxed">{S.heroSub}</p>
-      <div className="mt-5 grid grid-cols-2 gap-2">
-        <a href="#hot-coffee" className="press flex h-14 items-center justify-center rounded-full bg-[var(--brown)] text-[16px] font-semibold text-[var(--cream)]">
-          {S.seeMenu}
-        </a>
-        <a href="#together" className="press flex h-14 items-center justify-center rounded-full bg-[var(--bg-2)] text-[16px] font-semibold">
-          {S.togetherTitle}
-        </a>
-      </div>
+      <p className="max-w-[34ch] text-[18px] leading-relaxed">{canOrder ? S.heroSubOrder : S.heroSub}</p>
+      <a href="#hot-coffee" className="press mt-5 flex h-14 items-center justify-center rounded-full bg-[var(--brown)] text-[16px] font-semibold text-[var(--cream)]">
+        {S.seeMenu}
+      </a>
     </motion.div>
   );
 }
@@ -362,102 +362,6 @@ function CategoryBar() {
         })}
       </div>
     </nav>
-  );
-}
-
-// The live thing: the table's names. Whoever is selected is ordering; what
-// they add goes on their part of the bill.
-function Together() {
-  const S = useT();
-  const { party, active, setActive, addPerson, removePerson, openOrder } = useStore();
-  const [adding, setAdding] = useState(false);
-  const [name, setName] = useState("");
-
-  const submit = () => {
-    const n = name.trim();
-    if (n) addPerson(n);
-    setName("");
-    setAdding(false);
-  };
-
-  return (
-    <section id="together" className="relative mt-20 overflow-hidden rounded-[32px] bg-[var(--brown)] text-[var(--cream)]">
-      <div className="relative h-[220px] overflow-hidden">
-        <img src="/img/together.webp" alt={S.togetherAlt} loading="lazy" className="drift absolute inset-0 h-full w-full object-cover" />
-      </div>
-      <div className="relative px-5 pb-6 pt-6">
-        <motion.h2 className="text-[34px] font-bold leading-tight" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.8 }} transition={{ duration: 0.8, ease: EXPO }}>
-          {S.togetherTitle}
-        </motion.h2>
-        <p className="mt-2 max-w-[34ch] text-[16.5px] leading-relaxed text-[var(--cream)]/90">{S.togetherBody}</p>
-
-        <div className="mt-6 flex flex-wrap gap-2" role="tablist" aria-label={S.togetherTitle}>
-          <AnimatePresence initial={false}>
-            {party.map((p, i) => {
-              const on = i === active;
-              return (
-                <motion.div
-                  key={`${p}-${i}`}
-                  layout
-                  className="relative flex items-center"
-                  initial={{ opacity: 0, scale: 0.6, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.6 }}
-                  transition={{ type: "spring", duration: 0.5, bounce: 0.25 }}
-                >
-                  <button type="button" role="tab" aria-selected={on} onClick={() => setActive(i)} className="press relative flex h-12 items-center gap-2 rounded-full pe-4 ps-1.5 text-[16px] font-semibold">
-                    {on && <motion.span layoutId="who" className="absolute inset-0 rounded-full bg-[var(--cream)]" transition={{ type: "spring", duration: 0.45, bounce: 0.15 }} />}
-                    {!on && <span className="absolute inset-0 rounded-full bg-[var(--cream)]/12" />}
-                    <span className={`relative grid h-9 w-9 place-items-center rounded-full text-[15px] ${on ? "bg-[var(--brown)] text-[var(--cream)]" : "bg-[var(--cream)]/20"}`}>{p.slice(0, 1)}</span>
-                    <span className={`relative transition-colors duration-200 ${on ? "text-[var(--ink)]" : ""}`}>{p}</span>
-                  </button>
-                  {i > 0 && on && (
-                    <button type="button" aria-label={S.remove(p)} onClick={() => removePerson(i)} className="press ms-1 grid h-10 w-10 place-items-center rounded-full bg-[var(--cream)]/12">
-                      <X size={14} weight="bold" />
-                    </button>
-                  )}
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </div>
-
-        <AnimatePresence initial={false} mode="wait">
-          {adding ? (
-            <motion.form
-              key="form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                submit();
-              }}
-              className="mt-5 flex gap-2"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3, ease: EXPO }}
-            >
-              <label className="sr-only" htmlFor="friend">
-                {S.friendPh}
-              </label>
-              <input id="friend" autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder={S.friendPh} maxLength={18} enterKeyHint="done" className="field field-dark h-14 flex-1 rounded-full" />
-              <button type="submit" className="press h-14 rounded-full bg-[var(--cream)] px-6 text-[16px] font-semibold text-[var(--ink)]">
-                {S.addFriend}
-              </button>
-            </motion.form>
-          ) : (
-            <motion.div key="cells" className="mt-5 grid grid-cols-2 gap-2" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.3, ease: EXPO }}>
-              <button type="button" onClick={() => setAdding(true)} className="press flex h-14 items-center justify-center gap-2 rounded-full bg-[var(--cream)] text-[16px] font-semibold text-[var(--ink)]">
-                <Plus size={16} weight="bold" />
-                {S.addFriend}
-              </button>
-              <button type="button" onClick={openOrder} className="press flex h-14 items-center justify-center rounded-full bg-[var(--black)] text-[16px] font-semibold">
-                {S.viewOrder}
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </section>
   );
 }
 
