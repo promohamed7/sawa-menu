@@ -65,7 +65,8 @@ export function liveCatalog(data: LiveCatalog): Catalog | null {
             id: p.id,
             ar: p.name,
             priceCents: p.priceCents,
-            available: p.availability !== "UNAVAILABLE",
+            // Sawa shows every item whatever its stock in the cashier; only prices follow it live.
+            available: true,
             optionIds: (p.modifierGroups ?? []).filter((g) => g.isRequired && g.options.length).map((g) => g.options[0].id),
           })),
       };
