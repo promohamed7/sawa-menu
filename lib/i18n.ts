@@ -88,7 +88,7 @@ const EN: Strings = {
   dir: "ltr" as unknown as "rtl",
   switchTo: "ع",
   switchLabel: "العربية",
-  tagline: "Coffee and more",
+  tagline: "Coffee & more",
   seeMenu: "See the menu",
   favourites: "Most ordered",
   sections: "Menu sections",
