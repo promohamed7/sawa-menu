@@ -2,7 +2,7 @@
 
 import { InstagramLogo, FacebookLogo, WhatsappLogo, Plus, X } from "@phosphor-icons/react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from "react";
 import { STORE } from "@/data/menu";
 import { bundledCatalog, liveCatalog, type Catalog } from "@/lib/catalog";
 import { getCatalog, getConfig, resolveTable } from "@/lib/inbyte";
@@ -386,39 +386,42 @@ function CategoryBar() {
   );
 }
 
-// The close: black, their Instagram handle as display type, and the name
-// returning across the full width.
+// The close: a dark card that ends the page — the name, then one tidy list of ways to
+// reach Sawa (WhatsApp first, it is the one people tap), then a quiet credit line.
 function Closing() {
   const S = useT();
+  const phone = STORE.whatsapp ? `+${STORE.whatsapp.replace(/^(\d{2})(\d{3})(\d{3})(\d+)$/, "$1 $2 $3 $4")}` : "";
+  const links = [
+    STORE.whatsapp && { href: `https://wa.me/${STORE.whatsapp}`, icon: <WhatsappLogo size={22} weight="fill" />, label: S.whatsappLabel, value: phone },
+    { href: STORE.instagram, icon: <InstagramLogo size={22} weight="fill" />, label: S.instagramLabel, value: `@${STORE.instagramHandle}` },
+    { href: STORE.facebook, icon: <FacebookLogo size={22} weight="fill" />, label: S.facebookLabel, value: S.facebookName },
+  ].filter(Boolean) as { href: string; icon: ReactNode; label: string; value: string }[];
   return (
     <footer className="rounded-t-[32px] bg-[var(--black)] text-[var(--cream)]">
-      <div className="mx-auto flex min-h-[80svh] w-full max-w-[600px] lg:max-w-[1120px] flex-col px-5 pb-[calc(env(safe-area-inset-bottom)+104px)] pt-10">
-        <p className="max-w-[26ch] text-[19px] leading-snug">{S.opening}</p>
-        <a href={STORE.instagram} target="_blank" rel="noopener" dir="ltr" className="serif mt-auto block leading-[0.95] text-[var(--gold-soft)] transition-colors duration-200 hover:text-[var(--cream)]" style={{ fontSize: "12.6vw" }}>
-          @sawacoffee
-          <br />
-          official
-        </a>
-        <div className="mt-6 flex gap-2 text-[15px]">
-          <a href={STORE.instagram} target="_blank" rel="noopener" className="press flex h-11 items-center gap-1.5 rounded-full bg-[var(--cream)]/10 px-4">
-            <InstagramLogo size={18} weight="fill" /> Instagram
-          </a>
-          <a href={STORE.facebook} target="_blank" rel="noopener" className="press flex h-11 items-center gap-1.5 rounded-full bg-[var(--cream)]/10 px-4">
-            <FacebookLogo size={18} weight="fill" /> Facebook
-          </a>
-        </div>
-        {STORE.whatsapp && (
-          <a href={`https://wa.me/${STORE.whatsapp}`} target="_blank" rel="noopener" className="press mt-2 flex h-11 w-fit items-center gap-2 rounded-full bg-[var(--cream)]/10 px-4 text-[15px]">
-            <WhatsappLogo size={18} weight="fill" /> WhatsApp
-            <span dir="ltr" className="tabular-nums text-[var(--gold-soft)]">+{STORE.whatsapp.replace(/^(\d{2})(\d{3})(\d{3})(\d+)$/, "$1 $2 $3 $4")}</span>
-          </a>
-        )}
-        <svg viewBox="0 0 300 96" className="mt-10 block w-full" role="img" aria-label="sawa">
-          <text x="150" y="80" textAnchor="middle" className="serif" fill="var(--cream)" style={{ fontSize: 118, letterSpacing: "-6px" }}>
+      <div className="mx-auto w-full max-w-[600px] px-5 pb-[calc(env(safe-area-inset-bottom)+112px)] pt-12 lg:max-w-[720px]">
+        <div className="text-center">
+          <div className="serif leading-none text-[var(--gold-soft)]" style={{ fontSize: "clamp(64px, 22vw, 120px)" }} dir="ltr">
             sawa
-          </text>
-        </svg>
-        <p className="mt-2 text-[13px] text-[var(--cream-muted)]">{S.credit}</p>
+          </div>
+          <p className="mt-2 text-[15px] text-[var(--cream-muted)]">{S.tagline}</p>
+        </div>
+
+        <h2 className="mt-10 text-[13px] font-medium tracking-wide text-[var(--cream-muted)]">{S.closeTitle}</h2>
+        <ul className="mt-3 overflow-hidden rounded-[22px] bg-[var(--cream)]/[0.06] ring-1 ring-[var(--cream)]/10">
+          {links.map((l, i) => (
+            <li key={l.href} className={i > 0 ? "border-t border-[var(--cream)]/10" : undefined}>
+              <a href={l.href} target="_blank" rel="noopener" className="press flex min-h-[64px] items-center gap-3 px-4 transition-colors duration-200 hover:bg-[var(--cream)]/[0.04]">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--gold)]/15 text-[var(--gold-soft)]">{l.icon}</span>
+                <span className="text-[16px] font-medium">{l.label}</span>
+                <span dir="ltr" className="ms-auto truncate text-[14px] tabular-nums text-[var(--cream-muted)]">
+                  {l.value}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <p className="mt-10 border-t border-[var(--cream)]/10 pt-5 text-center text-[12px] text-[var(--cream-muted)]/80">{S.credit}</p>
       </div>
     </footer>
   );

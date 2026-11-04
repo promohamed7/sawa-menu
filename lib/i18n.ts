@@ -79,6 +79,11 @@ const AR = {
   orderNo: (n: string) => `رقم الطلب ${n}`,
   opening: "بنفتح قريب. تابعونا علشان تعرفوا الافتتاح وكل جديد.",
   credit: "سوا كوفي هاوس. الصور من Unsplash.",
+  closeTitle: "كلّمونا وتابعونا",
+  whatsappLabel: "واتساب",
+  instagramLabel: "إنستجرام",
+  facebookLabel: "فيسبوك",
+  facebookName: "Sawa Coffee House",
 };
 
 export type Strings = typeof AR;
@@ -154,6 +159,11 @@ const EN: Strings = {
   orderNo: (n: string) => `Order ${n}`,
   opening: "Opening soon. Follow us to hear about the opening and what's new.",
   credit: "Sawa Coffee House. Photos from Unsplash.",
+  closeTitle: "Say hello, follow along",
+  whatsappLabel: "WhatsApp",
+  instagramLabel: "Instagram",
+  facebookLabel: "Facebook",
+  facebookName: "Sawa Coffee House",
 };
 
 export const STRINGS = { ar: AR, en: EN };
