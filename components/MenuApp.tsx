@@ -45,7 +45,6 @@ export default function MenuApp() {
   const [party, setParty] = useState<string[]>([S.me]);
   const [active, setActiveRaw] = useState(0);
   const [table, setTable] = useState<Table | null>(null);
-  const [tableError, setTableError] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [ready, setReady] = useState(false);
   const badgeRef = useRef<HTMLSpanElement | null>(null);
@@ -79,7 +78,9 @@ export default function MenuApp() {
           } catch {
             /* storage unavailable */
           }
-        } else setTableError(true);
+        }
+        // A table code that does not resolve (an old or reprinted QR) just opens the menu:
+        // no error for the guest, who is only here to read it.
       });
     } else {
       try {
@@ -175,13 +176,6 @@ export default function MenuApp() {
           <Watermark />
           <div className="mx-auto w-full max-w-[600px] lg:max-w-[1120px] overflow-x-clip px-4 pt-8">
             <Intro />
-            <AnimatePresence>
-              {tableError && (
-                <motion.p role="alert" className="mt-6 rounded-[20px] bg-[#f3d9d3] px-4 py-3 text-[15px] text-[#7d1f15]" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                  {S.tableBad}
-                </motion.p>
-              )}
-            </AnimatePresence>
             <Favourites />
           </div>
           <CategoryBar />
