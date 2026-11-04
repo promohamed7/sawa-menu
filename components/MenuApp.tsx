@@ -1,6 +1,6 @@
 "use client";
 
-import { InstagramLogo, FacebookLogo, Plus, X } from "@phosphor-icons/react";
+import { InstagramLogo, FacebookLogo, WhatsappLogo, Plus, X } from "@phosphor-icons/react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { STORE } from "@/data/menu";
@@ -407,6 +407,12 @@ function Closing() {
             <FacebookLogo size={18} weight="fill" /> Facebook
           </a>
         </div>
+        {STORE.whatsapp && (
+          <a href={`https://wa.me/${STORE.whatsapp}`} target="_blank" rel="noopener" className="press mt-2 flex h-11 w-fit items-center gap-2 rounded-full bg-[var(--cream)]/10 px-4 text-[15px]">
+            <WhatsappLogo size={18} weight="fill" /> WhatsApp
+            <span dir="ltr" className="tabular-nums text-[var(--gold-soft)]">+{STORE.whatsapp.replace(/^(\d{2})(\d{3})(\d{3})(\d+)$/, "$1 $2 $3 $4")}</span>
+          </a>
+        )}
         <svg viewBox="0 0 300 96" className="mt-10 block w-full" role="img" aria-label="sawa">
           <text x="150" y="80" textAnchor="middle" className="serif" fill="var(--cream)" style={{ fontSize: 118, letterSpacing: "-6px" }}>
             sawa
