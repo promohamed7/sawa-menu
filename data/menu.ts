@@ -20,8 +20,8 @@ export type Category = {
 export const STORE = {
   code: "SAWA-COFFEE-HOUSE",
   name: "سوا",
-  // Set the real WhatsApp number before launch (international format, no +).
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP ?? "",
+  // WhatsApp, international format without + (wa.me link); shown at the end of the menu.
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || "201030776290",
   instagram: "https://www.instagram.com/sawacoffeeofficial/",
   instagramHandle: "sawacoffeeofficial",
   facebook: "https://www.facebook.com/profile.php?id=61593628312225",
