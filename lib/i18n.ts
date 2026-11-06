@@ -19,7 +19,6 @@ const AR = {
   soon: "السعر قريبًا",
   soldOut: "خلص النهارده",
   menuOnly: "اختار من المنيو واطلب من الكاشير أو الويتر.",
-  tableBad: "كود الترابيزة مش شغال. اطلب من الكاشير أو امسح الكود تاني.",
   items: (n: number) => (n === 1 ? "صنف" : n === 2 ? "صنفين" : n <= 10 ? `${n} أصناف` : `${n} صنف`),
   addOne: (n: string) => `أضف ${n}`,
   lessOne: (n: string) => `شيل واحد ${n}`,
@@ -79,6 +78,11 @@ const AR = {
   orderNo: (n: string) => `رقم الطلب ${n}`,
   opening: "بنفتح قريب. تابعونا علشان تعرفوا الافتتاح وكل جديد.",
   credit: "سوا كوفي هاوس. الصور من Unsplash.",
+  closeTitle: "كلّمونا وتابعونا",
+  whatsappLabel: "واتساب",
+  instagramLabel: "إنستجرام",
+  facebookLabel: "فيسبوك",
+  facebookName: "Sawa Coffee House",
 };
 
 export type Strings = typeof AR;
@@ -96,7 +100,6 @@ const EN: Strings = {
   soon: "Price soon",
   soldOut: "Sold out today",
   menuOnly: "Pick from the menu and order at the counter or from your waiter.",
-  tableBad: "This table code isn't working. Order at the counter or scan the code again.",
   items: (n: number) => (n === 1 ? "1 item" : `${n} items`),
   addOne: (n: string) => `Add ${n}`,
   lessOne: (n: string) => `One less ${n}`,
@@ -154,6 +157,11 @@ const EN: Strings = {
   orderNo: (n: string) => `Order ${n}`,
   opening: "Opening soon. Follow us to hear about the opening and what's new.",
   credit: "Sawa Coffee House. Photos from Unsplash.",
+  closeTitle: "Say hello, follow along",
+  whatsappLabel: "WhatsApp",
+  instagramLabel: "Instagram",
+  facebookLabel: "Facebook",
+  facebookName: "Sawa Coffee House",
 };
 
 export const STRINGS = { ar: AR, en: EN };
